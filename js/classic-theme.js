@@ -528,10 +528,9 @@ Doodle.spawnPlanet = function (state) {
     if (!Doodle._imgOK(g, pk)) return;
     var left = Math.random() < 0.5;
     var screenY = -120 - Math.random() * 260;                   // start above the view, drifts down
-    var p = grp.create(0, screenY - grp.y, pk);
-    p.anchor.setTo(0.5, 0.5);
-    // center placed ~0.2*width past the wall -> roughly the inner third peeks in
-    p.x = left ? (-0.2 * p.width) : (g.width + 0.2 * p.width);
+    var p = grp.create(left ? 0 : g.width, screenY - grp.y, pk);
+    p.anchor.setTo(0, 0.5);                                     // flat (cut) edge flush to the wall, curve peeks into the screen
+    if (!left) p.scale.x = -1;                                  // mirror so the flat edge sits on the RIGHT wall
   } catch (e) { Doodle._show("spawnPlanet: " + e.message); }
 };
 
