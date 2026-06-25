@@ -6,48 +6,47 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
     />
-    <title>Doodle Jump (Offline)</title>
+    <title>Doodle Jump (offline)</title>
     <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        background: #66a3d2;
-        overflow: hidden;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          Roboto, sans-serif;
+      html, body {
+        margin: 0; padding: 0; width: 100%; height: 100%;
+        background: #66a3d2; overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex; align-items: center; justify-content: center;
       }
-      body {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      canvas {
-        display: block;
-      }
-      #highscore {
-        position: absolute;
-        left: -100px;
-        top: -100px;
-        width: 5px;
-        display: none;
-      }
+      canvas { display: block; }
+      #highscore { position: absolute; left: -100px; top: -100px; width: 5px; display: none; }
     </style>
-    <!-- Perf cap + diagnostics: must load before Phaser -->
     <script src="js/perf.js"></script>
-    <!-- Engine + game scripts load fine from file:// -->
     <script src="js/lib/phaser.min.js"></script>
-    <!-- Inlined assets + loader redirect: makes XHR-loaded assets work offline -->
-    <script src="js/offline-assets.js"></script>
-    <script src="js/offline-shim.js"></script>
+    <!-- OFFLINE build: assets inlined as data-URIs so it runs straight from file:// (no server) -->
+    <script src="js/offline-assets.js?v=133"></script>
+    <script src="js/offline-shim.js?v=133"></script>
   </head>
-
   <body>
+    <div id="err" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#fff;color:#c00;font:12px/1.4 monospace;white-space:pre-wrap;padding:10px;max-height:60%;overflow:auto;display:none"></div>
+    <script>
+      (function () {
+        function show(msg) { var d = document.getElementById("err"); if (d) { d.style.display = "block"; d.textContent += msg + "\n"; } }
+        window.addEventListener("error", function (e) {
+          show("ERROR: " + (e.message || (e.error && e.error.message) || e.error) + "  @ " + (e.filename || "") + ":" + (e.lineno || "") + ":" + (e.colno || ""));
+          if (e.error && e.error.stack) show(String(e.error.stack).split("\n").slice(0, 4).join("\n"));
+        });
+        window.addEventListener("unhandledrejection", function (e) { show("PROMISE: " + (e.reason && e.reason.message ? e.reason.message : e.reason)); });
+        window.__DJ_DIAG = true;
+        // Silent safety net: only show the bar if the inlined assets failed to load.
+        window.addEventListener("DOMContentLoaded", function () {
+          try {
+            if (typeof window.__DJ_ASSETS === "undefined")
+              show("FATAL: offline-assets.js did not define __DJ_ASSETS.");
+          } catch (e) {}
+        });
+      })();
+    </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/production.min.js"></script>
-    <script src="js/doodle.js"></script>
+    <script src="js/classic-theme.js?v=133"></script>
+    <script src="js/classic.themed.js?v=133"></script>
+    <script src="js/doodle.js?v=133"></script>
   </body>
 </html>
