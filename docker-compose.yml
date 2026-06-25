@@ -1,0 +1,8 @@
+# Local dev / Coolify can also consume this directly.
+services:
+  djweb:
+    build: .
+    image: djweb:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped

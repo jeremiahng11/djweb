@@ -208,22 +208,32 @@ Doodle.applyMenuBg = function (state) {
     // only the doodler + UFO are themed (set up elsewhere). Here we tuck the themed preview slider
     // BEHIND the torn-paper bottom edge so it peeks out, like classic Doodle Jump.
     if (Doodle._imgOK(state.game, "themestrip_" + t)) {
-      var _st = state.add.sprite(0, 827, "themestrip_" + t); _st.width = 640; _st.height = 128;   // slider shown FULL at the very bottom (native size)
-      // DRAG the slider left/right to change the theme (reloads with the picked theme)
-      _st.inputEnabled = true; _st.input.enableDrag(); _st.input.allowVerticalDrag = false;
-      _st._homeX = _st.x;
-      _st.events.onDragStop.add(function () {
-        var dlt = _st.x - _st._homeX; _st.x = _st._homeX;
-        var TH = Doodle.THEMES, i = TH.indexOf(Doodle.getTheme()); if (i < 0) i = 0;
-        if (dlt < -40) i = (i + 1) % TH.length;
-        else if (dlt > 40) i = (i - 1 + TH.length) % TH.length;
-        else return;
-        Doodle.setTheme(TH[i]);
-        state.game.state.start("Preload");
+      var TH = Doodle.THEMES, curIdx = TH.indexOf(t); if (curIdx < 0) curIdx = 0;
+      // CAROUSEL: every theme's preview laid out in a row, the current one centered.
+      // Drag the slider left/right -> the neighbouring themes slide in (you see what you're picking).
+      var strip = state.add.group();
+      TH.forEach(function (thm, i) {
+        var key = "themestrip_" + thm;
+        if (!Doodle._imgOK(state.game, key)) return;
+        var sp = strip.create(i * 640, 827, key); sp.width = 640; sp.height = 128;
       });
+      strip.x = -curIdx * 640;
       if (Doodle._imgOK(state.game, "menutorn")) {
-        var _tn = state.add.sprite(0, 814, "menutorn"); _tn.width = 640; _tn.height = 82;       // torn-paper edge from the tile set, used AS-IS (curls + shadows intact), tearing into the slider
+        var _tn = state.add.sprite(0, 814, "menutorn"); _tn.width = 640; _tn.height = 82;       // torn-paper edge stays fixed; previews slide under it
       }
+      // invisible drag handle on top; moving it scrolls the strip, releasing snaps to a theme
+      var hit = state.add.sprite(0, 827, "themestrip_" + t);
+      hit.width = 640; hit.height = 128; hit.alpha = 0;
+      hit.inputEnabled = true; hit.input.enableDrag(); hit.input.allowVerticalDrag = false;
+      var _base = strip.x, _minX = -(TH.length - 1) * 640;
+      hit.events.onDragUpdate.add(function () {
+        var x = _base + hit.x; if (x > 0) x = 0; if (x < _minX) x = _minX; strip.x = x;
+      });
+      hit.events.onDragStop.add(function () {
+        var idx = Math.round(-strip.x / 640); if (idx < 0) idx = 0; if (idx > TH.length - 1) idx = TH.length - 1;
+        strip.x = -idx * 640; hit.x = 0;
+        if (TH[idx] !== Doodle.getTheme()) { Doodle.setTheme(TH[idx]); state.game.state.start("Preload"); }
+      });
     }
   } catch (e) { Doodle._show("applyMenuBg: " + e.message); }
 };
@@ -397,7 +407,7 @@ Doodle.activateRocket = function (a, b, gs) {
           a.anchor.setTo(0.5, 0.42);
           a.animations.add("rk", [0, 1, 2, 3, 4, 5, 6, 7, 8], 16, true); a.play("rk");
         }
-        if (a.body) { a.body.enable = true; a.body.allowGravity = true; a.body.velocity.x = 0; a.body.velocity.y = -1000; a.body.gravity.y = -2200; } // boost off the pad
+        if (a.body) { a.body.enable = true; a.body.allowGravity = true; a.body.velocity.x = 0; a.body.velocity.y = -1400; a.body.gravity.y = -2400; } // stronger boost off the pad -> FASTER climb (~-2200), longer distance
         Doodle._rocketFlight(a, gs, th);
       } catch (eL) { Doodle._show("rocket launch: " + eL.message); }
     };
@@ -414,7 +424,7 @@ Doodle._rocketFlight = function (a, gs, th) {
   try {
     var pt = a.playerTimer, S = Phaser.Timer.SECOND / 60;
     pt.add(72 * S, function () { a.body.gravity.y = -1728; });  // cancels world gravity -> STEADY climb (constant speed)
-    pt.add(285 * S, function () { a.body.gravity.y = 0; });     // thrust off -> world gravity DECELERATES it to the apex (clear slow-down toward the end)
+    pt.add(285 * S, function () { a.body.gravity.y = 850; });   // thrust off -> STRONGER decel (world+850) so the faster rocket still slows to the same gentle ~-270 exit speed
     pt.add(330 * S, function () {
       try {
         var _vy = (a.body && a.body.velocity) ? a.body.velocity.y : -280; // CONTINUE the flight's upward speed -> no jerk at exit
