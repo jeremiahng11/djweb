@@ -33,7 +33,7 @@ Doodle.CalibrateState = {
         this.calibratedValue = localStorage.getItem("DJ_calibrated") || 0
     },
     create: function() {
-        this.jumpSound = this.add.audio("jump"), this.background = this.add.sprite(0, 0, "atlas2", "background"), this.info = this.add.sprite(this.world.game.width / 2, this.world.game.height / 2, "atlas2", "calibrateInfo"), this.info.anchor.setTo(.5), this.doneButton = new Phaser.Sprite(this.game, 370, 840, "atlas2", "donebtn"), this.doneButton.inputEnabled = !0, this.doneButton.events.onInputOut.add(function() {
+        this.jumpSound = this.add.audio("jump"), this.background = this.add.sprite(0, 0, "atlas2", "background"), Doodle.fillSubBg(this), this.info = this.add.sprite(this.world.game.width / 2, this.world.game.height / 2, "atlas2", "calibrateInfo"), this.info.anchor.setTo(.5), this.doneButton = new Phaser.Sprite(this.game, 370, 840, "atlas2", "donebtn"), this.doneButton.inputEnabled = !0, this.doneButton.events.onInputOut.add(function() {
             this.doneButton.loadTexture("atlas2", "donebtn")
         }, this), this.doneButton.events.onInputUp.add(function() {
             14 == this.doneButton.frame && (this.state.start("Settings"), this.doneButton.loadTexture("atlas2", "donebtn"))
@@ -594,7 +594,7 @@ Doodle.ScoresState = {
             this.setState("achievements")
         }, this), this.stats.achievements.forEach(function(a, b) {
             0 == a[3] ? icon = this.add.sprite(115, 285 + 105 * b, "atlas2", "ach") : icon = this.add.sprite(115, 285 + 105 * b, "atlas2", 19 == b ? "ach16" : "ach" + b), this.achievementsGroup.add(icon)
-        }, this), this.scrollMenu.add(this.backgroundScores), this.scrollMenu.add(this.scoresBtn), this.scrollMenu.add(this.statsBtn), this.scrollMenu.add(this.achievementsBtn), this.scrollMenu.add(this.achievementsGroup), this.scrollMenu2.add(this.backgroundScores2), this.achievementsGroup.visible = !1, this.background = this.add.sprite(0, 0, "atlas3", "scores"), this.globalButton = this.add.sprite(460, 755, "atlas2", "globalBtn"), this.globalButton.inputEnabled = !0, this.globalButton.events.onInputDown.add(function() {
+        }, this), this.scrollMenu.add(this.backgroundScores), this.scrollMenu.add(this.scoresBtn), this.scrollMenu.add(this.statsBtn), this.scrollMenu.add(this.achievementsBtn), this.scrollMenu.add(this.achievementsGroup), this.scrollMenu2.add(this.backgroundScores2), this.achievementsGroup.visible = !1, this.background = this.add.sprite(0, 0, "atlas3", "scores"), Doodle.fillSubBg(this), this.globalButton = this.add.sprite(460, 755, "atlas2", "globalBtn"), this.globalButton.inputEnabled = !0, this.globalButton.events.onInputDown.add(function() {
             this.setLoad("global")
         }, this), this.localButton = this.add.sprite(320, 755, "atlas2", "localBtn"), this.localButton.inputEnabled = !0, this.localButton.events.onInputDown.add(function() {
             this.setLoad("local")
@@ -671,7 +671,7 @@ Doodle.SettingsState = {
         this.soundToggleValue = localStorage.getItem("DJ_soundToggle") || !0, this.directionalShootingValue = localStorage.getItem("DJ_directionalShooting") || !1, this.calibrateValue = localStorage.getItem("DJ_calibrate") || "AUTO", this.calibratedValue = localStorage.getItem("DJ_calibrated") || 0
     },
     create: function() {
-        this.background = this.add.sprite(0, 0, "atlas2", "background"), this.menuButton = new Phaser.Sprite(this.game, 370, 800, "atlas", "menu_01"), this.menuButton.inputEnabled = !0, this.menuButton.events.onInputOut.add(function() {
+        this.background = this.add.sprite(0, 0, "atlas2", "background"), Doodle.fillSubBg(this), this.menuButton = new Phaser.Sprite(this.game, 370, 800, "atlas", "menu_01"), this.menuButton.inputEnabled = !0, this.menuButton.events.onInputOut.add(function() {
             this.menuButton.loadTexture("atlas", "menu_01")
         }, this), this.menuButton.events.onInputUp.add(function() {
             5 == this.menuButton.frame && (this.state.start("Menu"), this.menuButton.loadTexture("atlas", "menu_01"))

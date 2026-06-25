@@ -170,6 +170,7 @@ Doodle.loadThemeAssets = function (game) {
       // menu chrome + ALL theme-slider previews (the menu's drag slider cycles every theme)
       game.load.image("menutorn", "static/images/themeslider/menu_tornpaper.png");
       game.load.image("mainmenu", "static/images/Backgrounds/menu_tiled.png");
+      game.load.image("linedbg", "static/images/Backgrounds/linedbg.png"); // plain tall lined paper to fill sub-screens (scores/options) full-height
       Doodle.THEMES.forEach(function (_tm) {
         var _pn = ({ "default": "original", snow: "winter", doodlestein: "halloween" })[_tm] || _tm;
         game.load.image("themestrip_" + _tm, "static/images/themeslider/theme_" + _pn + "_X.png");
@@ -620,6 +621,16 @@ Doodle.applyTopBar = function (state) {
     state.panel.width = 640; state.panel.height = 92;
     state.panel.alpha = 1;
   } catch (e) { Doodle._show("applyTopBar: " + e.message); }
+};
+
+// Fill a sub-screen (scores / options / calibrate) with full-height lined paper so there's no empty band below.
+Doodle.fillSubBg = function (state) {
+  try {
+    if (!Doodle._imgOK(state.game, "linedbg")) return;
+    var bg = state.add.sprite(0, 0, "linedbg");
+    bg.width = 640; bg.height = Math.max(state.game.height, 1800);
+    state.world.sendToBack(bg);
+  } catch (e) {}
 };
 
 Doodle._applyBg = function (state) {
