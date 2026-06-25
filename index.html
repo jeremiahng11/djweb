@@ -15,9 +15,9 @@
         display: flex; align-items: center; justify-content: center;
       }
       canvas { display: block; }
-      /* MOBILE: fixed host sized EXACTLY to the screen (100dvh = the real full viewport incl. the home-indicator area).
-         No extra padding -> the canvas isn't taller than the screen, so the slider can't get pushed off the bottom. */
-      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
+      /* MOBILE: fixed with inset:0 and NO explicit height -> fills the fixed containing block = the true full screen
+         (incl. the home-indicator strip) under viewport-fit=cover. CSS vh/dvh/lvh & innerHeight all read short of it. */
+      #gameParent { position: fixed; inset: 0; overflow: hidden; }
       /* DESKTOP/tablet: show it as a centered phone-shaped window instead of stretching across the page */
       @media (min-width: 700px) {
         #gameParent { position: relative; inset: auto; height: 94vh; max-height: 920px; aspect-ratio: 430 / 880; width: auto; }
@@ -85,8 +85,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=148"></script>
-    <script src="js/classic.themed.js?v=148"></script>
-    <script src="js/doodle.js?v=148"></script>
+    <script src="js/classic-theme.js?v=149"></script>
+    <script src="js/classic.themed.js?v=149"></script>
+    <script src="js/doodle.js?v=149"></script>
   </body>
 </html>
