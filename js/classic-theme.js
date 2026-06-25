@@ -184,6 +184,7 @@ Doodle.loadThemeAssets = function (game) {
 
 // ---- backgrounds ----
 Doodle.applyMenuBg = function (state) {
+  Doodle.setPageBg(Doodle.themeBottomColor()); // home-indicator strip matches the menu's bottom (space slate / cream)
   try {
     var t = Doodle.getTheme();
     // (tiled menu + theme slider show for EVERY theme so you can always drag the slider to change it)
@@ -623,8 +624,14 @@ Doodle.applyTopBar = function (state) {
   } catch (e) { Doodle._show("applyTopBar: " + e.message); }
 };
 
+// Paint the HTML page background to match the current screen's bottom edge. iOS PWAs won't let the canvas
+// paint under the home indicator, so this makes that strip blend (space slate / cream) instead of showing black.
+Doodle.setPageBg = function (color) { try { document.body.style.background = color; } catch (e) {} };
+Doodle.themeBottomColor = function () { return Doodle.getTheme() === "default" ? "#f7efe7" : "#404a59"; };
+
 // Fill a sub-screen (scores / options / calibrate) with full-height lined paper so there's no empty band below.
 Doodle.fillSubBg = function (state) {
+  Doodle.setPageBg("#f7efe7"); // lined-paper cream under the home indicator
   try {
     if (!Doodle._imgOK(state.game, "linedbg")) return;
     var bg = state.add.sprite(0, 0, "linedbg");
@@ -634,6 +641,7 @@ Doodle.fillSubBg = function (state) {
 };
 
 Doodle._applyBg = function (state) {
+  Doodle.setPageBg(Doodle.themeBottomColor()); // home-indicator strip matches the in-game theme bg (space slate / cream)
   try { Doodle._bg = state.background; Doodle._setBg(state.game, Doodle.getTheme()); }
   catch (e) { Doodle._show("_applyBg: " + e.message); }
 };
