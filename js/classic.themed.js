@@ -2,16 +2,9 @@ var Doodle = Doodle || {};
 
 Doodle.BootState = {
     init: function() {
-        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        // COVER scale: fill the whole screen (no letterbox borders); tiny overflow is cropped & centered
-        this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-        var _g = this.game, _fit = function () {
-            var vw = window.innerWidth || _g.width, vh = window.innerHeight || _g.height;
-            var s = Math.max(vw / _g.width, vh / _g.height);
-            _g.scale.setUserScale(s, s);
-        };
-        _fit(); window.addEventListener("resize", _fit); window.addEventListener("orientationchange", _fit);
-        // safe-area insets (notch / home indicator) + cover-crop, expressed in GAME units, so HUD clears them
+        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL, this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        var _g = this.game;
+        // safe-area insets (status bar / home indicator) in GAME units, so the HUD clears them under viewport-fit=cover
         Doodle.safeTop = 0; Doodle.safeBot = 0;
         try {
             var _pr = document.createElement("div");
@@ -19,10 +12,10 @@ Doodle.BootState = {
             document.body.appendChild(_pr);
             var _cs = window.getComputedStyle(_pr), _st = parseFloat(_cs.paddingTop) || 0, _sb = parseFloat(_cs.paddingBottom) || 0;
             document.body.removeChild(_pr);
-            var _us = Math.max((window.innerWidth || _g.width) / _g.width, (window.innerHeight || _g.height) / _g.height);
-            var _ct = Math.max(0, (_g.height * _us - (window.innerHeight || _g.height)) / 2);
-            Doodle.safeTop = Math.round((_ct + _st) / _us);
-            Doodle.safeBot = Math.round((_ct + _sb) / _us)
+            var _s = Math.min((window.innerWidth || _g.width) / _g.width, (window.innerHeight || _g.height) / _g.height);
+            var _lb = Math.max(0, ((window.innerHeight || _g.height) - _g.height * _s) / 2);
+            Doodle.safeTop = Math.round(Math.max(0, _st - _lb) / _s);
+            Doodle.safeBot = Math.round(Math.max(0, _sb - _lb) / _s)
         } catch (_e) {}
     },
     preload: function() {
@@ -472,7 +465,7 @@ Doodle.MenuState = {
                 //window.open(a.link, "_blank")
             }, this)
         }
-        this.platform = this.add.sprite(60, 750, "atlas", "platform0"), this.game.physics.arcade.enable(this.platform), this.platform.body.allowGravity = !1, this.platform.body.immovable = !0, this.player = this.add.sprite(115, this.game.world.height + 100, Doodle.playerKey()), this.player.anchor.setTo(.5), this.game.physics.arcade.enable(this.player), this.player.body.setSize(60, 90, 0, 20), this.player.body.velocity.y = -2100, this.player.scale.setTo(-1, 1), this.ufo = new Doodle.Obstacle(this.game, 500, 150, "6"), this.add.existing(this.ufo), this.game.sound.volume = .3, this.playButton = this.add.sprite(130, 385, "atlas", "Play_01"), this.playButton.inputEnabled = !0, this.playButton.events.onInputUp.add(function() {
+        this.platform = this.add.sprite(60, 750, "atlas", "platform0"), this.game.physics.arcade.enable(this.platform), this.platform.body.allowGravity = !1, this.platform.body.immovable = !0, this.player = this.add.sprite(115, this.game.world.height + 100, Doodle.playerKey()), this.player.anchor.setTo(.5), this.game.physics.arcade.enable(this.player), this.player.body.setSize(60, 90, 0, 20), this.player.body.velocity.y = -2100, this.player.scale.setTo(-1, 1), this.ufo = new Doodle.Obstacle(this.game, 500, 150 + (Doodle.safeTop || 0), "6"), this.add.existing(this.ufo), this.game.sound.volume = .3, this.playButton = this.add.sprite(130, 385, "atlas", "Play_01"), this.playButton.inputEnabled = !0, this.playButton.events.onInputUp.add(function() {
             11 == this.playButton.frame && (this.camera.fade("#000000"), this.camera.onFadeComplete.add(function() {
                 this.state.start("Game"), this.playButton.loadTexture("atlas", "Play_01")
             }, this))

@@ -4,12 +4,9 @@ var Doodle = Doodle || {};
 // Width stays 635 (gameplay is balanced around it); height grows on tall phones -> more vertical room.
 var _djW = 635, _djH = 955;
 try {
-  // use the device's stable portrait screen aspect (innerHeight jitters with the address bar / PWA chrome)
-  var _sw = window.innerWidth || 390, _sh = window.innerHeight || 844;
-  if (window.screen && window.screen.width && window.screen.height) {
-    _sw = Math.min(window.screen.width, window.screen.height);
-    _sh = Math.max(window.screen.width, window.screen.height);
-  }
+  // match the ACTUAL viewport aspect so the game fills the screen exactly under SHOW_ALL.
+  // (window.screen misreports aspect on some phones -> too-short canvas + black band; innerHeight is the real viewport.)
+  var _sw = window.innerWidth || 393, _sh = window.innerHeight || 852;
   _djH = Math.max(955, Math.min(1800, Math.round(_djW * (_sh / _sw))));
 } catch (e) {}
 Doodle.game = new Phaser.Game(_djW, _djH, Phaser.AUTO);
