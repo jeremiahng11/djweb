@@ -184,7 +184,7 @@ Doodle.loadThemeAssets = function (game) {
 
 // ---- backgrounds ----
 Doodle.applyMenuBg = function (state) {
-  Doodle.setPageBg(Doodle.themeBottomColor()); // home-indicator strip matches the menu's bottom (space slate / cream)
+  Doodle.setPageBgScene(Doodle.themeBottomColor()); // home-indicator strip shows the slider scene continuing down
   try {
     var t = Doodle.getTheme();
     // (tiled menu + theme slider show for EVERY theme so you can always drag the slider to change it)
@@ -261,6 +261,7 @@ Doodle.applyMenuBg = function (state) {
                 try {
                   if (state.player && state.player.loadTexture) { state.player.loadTexture(Doodle.playerKey()); state.player.frame = 0; }
                   if (Doodle.applyMenuDecor) Doodle.applyMenuDecor(state);
+                  Doodle.setPageBgScene(Doodle.themeBottomColor()); // strip follows the newly-selected theme's scene
                 } catch (e2) {}
               });
               g.load.start();
@@ -628,6 +629,17 @@ Doodle.applyTopBar = function (state) {
 // paint under the home indicator, so this makes that strip blend (space slate / cream) instead of showing black.
 Doodle.setPageBg = function (color) { try { document.body.style.background = color; } catch (e) {} };
 Doodle.themeBottomColor = function () { return Doodle.getTheme() === "default" ? "#f7efe7" : "#404a59"; };
+// Paint the page bg as the current theme's slider scene anchored to the bottom, so the home-indicator strip
+// shows the space scene continuing down (instead of a flat band). Color fallback if the image can't load.
+Doodle.setPageBgScene = function (color) {
+  try {
+    var t = Doodle.getTheme();
+    var pn = ({ "default": "original", snow: "winter", doodlestein: "halloween" })[t] || t;
+    var path = "static/images/themeslider/theme_" + pn + "_X.png";
+    var url = (window.__DJ_ASSETS && window.__DJ_ASSETS[path]) || path;
+    document.body.style.background = color + " url('" + url + "') center bottom / 100% auto no-repeat";
+  } catch (e) { Doodle.setPageBg(color); }
+};
 
 // Fill a sub-screen (scores / options / calibrate) with full-height lined paper so there's no empty band below.
 Doodle.fillSubBg = function (state) {
