@@ -619,8 +619,10 @@ Doodle.applyTopBar = function (state) {
     var k = "top_" + t;
     if (!d || !d.top || !Doodle._imgOK(state.game, k)) return;
     state.panel.loadTexture(k);
-    state.panel.cameraOffset.set(0, (Doodle.safeTop || 0)); state.panel.y = (Doodle.safeTop || 0); state.panel.x = 0;
-    state.panel.width = 640; state.panel.height = 92;
+    // anchor to the very top and grow downward by the safe-area inset, so the bar covers the status-bar area
+    // (no game peeking above it) while the score sits below the notch.
+    state.panel.cameraOffset.set(0, -23); state.panel.y = -23; state.panel.x = 0;
+    state.panel.width = 640; state.panel.height = 92 + (Doodle.safeTop || 0);
     state.panel.alpha = 1;
   } catch (e) { Doodle._show("applyTopBar: " + e.message); }
 };
