@@ -2,7 +2,15 @@ var Doodle = Doodle || {};
 
 Doodle.BootState = {
     init: function() {
-        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL, this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE)
+        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        // COVER scale: fill the whole screen (no letterbox borders); tiny overflow is cropped & centered
+        this.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+        var _g = this.game, _fit = function () {
+            var vw = window.innerWidth || _g.width, vh = window.innerHeight || _g.height;
+            var s = Math.max(vw / _g.width, vh / _g.height);
+            _g.scale.setUserScale(s, s);
+        };
+        _fit(); window.addEventListener("resize", _fit); window.addEventListener("orientationchange", _fit)
     },
     preload: function() {
         this.load.image("loadingscreen", "static/images/Preloader2.png"), this.load.image("cloudgameslogo", "static/images/Preloader21.png"), this.load.image("limaskylogo", "static/images/Preloader22.png")
@@ -451,7 +459,7 @@ Doodle.MenuState = {
                 //window.open(a.link, "_blank")
             }, this)
         }
-        this.platform = this.add.sprite(60, 750, "atlas", "platform0"), this.game.physics.arcade.enable(this.platform), this.platform.body.allowGravity = !1, this.platform.body.immovable = !0, this.player = this.add.sprite(115, this.game.world.height + 100, Doodle.playerKey()), this.player.anchor.setTo(.5), this.game.physics.arcade.enable(this.player), this.player.body.setSize(60, 90, 0, 20), this.player.body.velocity.y = -2100, this.player.scale.setTo(-1, 1), this.ufo = new Doodle.Obstacle(this.game, 500, 150, "6"), this.add.existing(this.ufo), this.game.sound.volume = .3, this.playButton = this.add.sprite(130, 230, "atlas", "Play_01"), this.playButton.inputEnabled = !0, this.playButton.events.onInputUp.add(function() {
+        this.platform = this.add.sprite(60, 750, "atlas", "platform0"), this.game.physics.arcade.enable(this.platform), this.platform.body.allowGravity = !1, this.platform.body.immovable = !0, this.player = this.add.sprite(115, this.game.world.height + 100, Doodle.playerKey()), this.player.anchor.setTo(.5), this.game.physics.arcade.enable(this.player), this.player.body.setSize(60, 90, 0, 20), this.player.body.velocity.y = -2100, this.player.scale.setTo(-1, 1), this.ufo = new Doodle.Obstacle(this.game, 500, 150, "6"), this.add.existing(this.ufo), this.game.sound.volume = .3, this.playButton = this.add.sprite(130, 385, "atlas", "Play_01"), this.playButton.inputEnabled = !0, this.playButton.events.onInputUp.add(function() {
             11 == this.playButton.frame && (this.camera.fade("#000000"), this.camera.onFadeComplete.add(function() {
                 this.state.start("Game"), this.playButton.loadTexture("atlas", "Play_01")
             }, this))
@@ -459,13 +467,13 @@ Doodle.MenuState = {
             this.playButton.loadTexture("atlas", "Play_02")
         }, this), this.playButton.events.onInputOut.add(function() {
             this.playButton.loadTexture("atlas", "Play_01")
-        }, this), this.optionsButton = this.add.sprite(this.world.game.width - 140, this.world.game.height - (Doodle.getTheme() == "default" ? 240 : 432), "atlas2", "opt"), this.optionsButton.inputEnabled = !0, this.optionsButton.events.onInputUp.add(function() {
+        }, this), this.optionsButton = this.add.sprite(this.world.game.width - 140, this.world.game.height - (Doodle.getTheme() == "default" ? 240 : 320), "atlas2", "opt"), this.optionsButton.inputEnabled = !0, this.optionsButton.events.onInputUp.add(function() {
             29 == this.optionsButton.frame && this.state.start("Settings")
         }, this), this.optionsButton.events.onInputDown.add(function() {
             this.optionsButton.loadTexture("atlas2", "opt1")
         }, this), this.optionsButton.events.onInputOut.add(function() {
             this.optionsButton.loadTexture("atlas2", "opt")
-        }, this), this.scoresButton = this.add.sprite(this.world.game.width - 260, this.world.game.height - (Doodle.getTheme() == "default" ? 240 : 432), "atlas2", "opt2"), this.scoresButton.inputEnabled = !0, this.scoresButton.events.onInputUp.add(function() {
+        }, this), this.scoresButton = this.add.sprite(this.world.game.width - 260, this.world.game.height - (Doodle.getTheme() == "default" ? 240 : 320), "atlas2", "opt2"), this.scoresButton.inputEnabled = !0, this.scoresButton.events.onInputUp.add(function() {
             32 == this.scoresButton.frame && this.state.start("Scores")
         }, this), this.scoresButton.events.onInputDown.add(function() {
             this.scoresButton.loadTexture("atlas2", "opt3")
