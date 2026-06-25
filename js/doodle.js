@@ -7,6 +7,15 @@ try {
   // match the ACTUAL viewport aspect so the game fills the screen exactly under SHOW_ALL.
   // (window.screen misreports aspect on some phones -> too-short canvas + black band; innerHeight is the real viewport.)
   var _sw = window.innerWidth || 393, _sh = window.innerHeight || 852;
+  // innerHeight excludes the notch/home-indicator safe areas on some PWAs -> add them back so the canvas covers the FULL screen
+  try {
+    var _p = document.createElement("div");
+    _p.style.cssText = "position:fixed;top:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)";
+    document.body.appendChild(_p);
+    var _c = window.getComputedStyle(_p);
+    _sh += (parseFloat(_c.paddingTop) || 0) + (parseFloat(_c.paddingBottom) || 0);
+    document.body.removeChild(_p);
+  } catch (e2) {}
   _djH = Math.max(955, Math.min(1800, Math.round(_djW * (_sh / _sw))));
 } catch (e) {}
 Doodle.game = new Phaser.Game(_djW, _djH, Phaser.AUTO);
