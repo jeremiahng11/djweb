@@ -15,7 +15,7 @@
         display: flex; align-items: center; justify-content: center;
       }
       canvas { display: block; }
-      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: calc(100vh + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
+      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
       @media (min-width: 700px) {
         #gameParent { position: relative; inset: auto; height: 94vh; max-height: 920px; aspect-ratio: 430 / 880; width: auto; }
       }
@@ -24,8 +24,8 @@
     <script src="js/perf.js"></script>
     <script src="js/lib/phaser.min.js"></script>
     <!-- OFFLINE build: assets inlined as data-URIs so it runs straight from file:// (no server) -->
-    <script src="js/offline-assets.js?v=146"></script>
-    <script src="js/offline-shim.js?v=146"></script>
+    <script src="js/offline-assets.js?v=147"></script>
+    <script src="js/offline-shim.js?v=147"></script>
   </head>
   <body>
     <div id="gameParent"></div>
@@ -51,8 +51,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=146"></script>
-    <script src="js/classic.themed.js?v=146"></script>
-    <script src="js/doodle.js?v=146"></script>
+    <script src="js/classic-theme.js?v=147"></script>
+    <script src="js/classic.themed.js?v=147"></script>
+    <script src="js/doodle.js?v=147"></script>
   </body>
 </html>
