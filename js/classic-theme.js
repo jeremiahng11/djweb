@@ -167,11 +167,13 @@ Doodle.loadThemeAssets = function (game) {
         for (var pi = 0; pi < 10; pi++) // ALL 10 planets from the tile set, used as side bodies
           game.load.image("pf_" + th + "_" + pi, "static/images/PlanetTiles/full_" + pi + ".png");
       }
-      if (d && d.strip) {
-        game.load.image("themestrip_" + th, "static/images/themeslider/theme_" + th + "_X.png");
-        game.load.image("menutorn", "static/images/themeslider/menu_tornpaper.png"); // torn-paper edge in front of the slider
-        game.load.image("mainmenu", "static/images/Backgrounds/menu_tiled.png"); // menu bg built from loadingtile (consistent 35px grid + title/monsters)
-      }
+      // menu chrome + ALL theme-slider previews (the menu's drag slider cycles every theme)
+      game.load.image("menutorn", "static/images/themeslider/menu_tornpaper.png");
+      game.load.image("mainmenu", "static/images/Backgrounds/menu_tiled.png");
+      Doodle.THEMES.forEach(function (_tm) {
+        var _pn = ({ "default": "original", snow: "winter", doodlestein: "halloween" })[_tm] || _tm;
+        game.load.image("themestrip_" + _tm, "static/images/themeslider/theme_" + _pn + "_X.png");
+      });
       if (d) d.suits.forEach(function (s) {
         game.load.spritesheet("pl_" + th + "__" + s, "static/images/PlayerSheets/" + th + "__" + s + ".png", 124, 120, 4);
       });
@@ -183,13 +185,13 @@ Doodle.loadThemeAssets = function (game) {
 Doodle.applyMenuBg = function (state) {
   try {
     var t = Doodle.getTheme();
-    if (t === "default") return;
-    // swap the menu background to the dedicated main_menu art
+    // (tiled menu + theme slider show for EVERY theme so you can always drag the slider to change it)
+    // swap the menu background to the tiled menu art
     if (state.bgMenu && Doodle._imgOK(state.game, "mainmenu")) { state.bgMenu.loadTexture("mainmenu"); state.bgMenu.width = 640; state.bgMenu.height = 960; }
     // play the UFO warning sound once when the themed menu loads
     // UFO sound AUTOPLAYS on menu load: try to resume the (possibly suspended) audio context, then play.
     // Stopped on leaving the menu so a queued play can't bleed into the game start.
-    try {
+    if (t === "space") try {
       var _sm = state.game.sound;
       if (_sm && _sm.context && _sm.context.state === "suspended" && _sm.context.resume) _sm.context.resume();
       if (!state._ufoPlayed && _sm && !_sm.noAudio) {
@@ -207,6 +209,18 @@ Doodle.applyMenuBg = function (state) {
     // BEHIND the torn-paper bottom edge so it peeks out, like classic Doodle Jump.
     if (Doodle._imgOK(state.game, "themestrip_" + t)) {
       var _st = state.add.sprite(0, 827, "themestrip_" + t); _st.width = 640; _st.height = 128;   // slider shown FULL at the very bottom (native size)
+      // DRAG the slider left/right to change the theme (reloads with the picked theme)
+      _st.inputEnabled = true; _st.input.enableDrag(); _st.input.allowVerticalDrag = false;
+      _st._homeX = _st.x;
+      _st.events.onDragStop.add(function () {
+        var dlt = _st.x - _st._homeX; _st.x = _st._homeX;
+        var TH = Doodle.THEMES, i = TH.indexOf(Doodle.getTheme()); if (i < 0) i = 0;
+        if (dlt < -40) i = (i + 1) % TH.length;
+        else if (dlt > 40) i = (i - 1 + TH.length) % TH.length;
+        else return;
+        Doodle.setTheme(TH[i]);
+        state.game.state.start("Preload");
+      });
       if (Doodle._imgOK(state.game, "menutorn")) {
         var _tn = state.add.sprite(0, 814, "menutorn"); _tn.width = 640; _tn.height = 82;       // torn-paper edge from the tile set, used AS-IS (curls + shadows intact), tearing into the slider
       }
