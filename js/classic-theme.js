@@ -231,8 +231,24 @@ Doodle.applyMenuBg = function (state) {
       });
       hit.events.onDragStop.add(function () {
         var idx = Math.round(-strip.x / 640); if (idx < 0) idx = 0; if (idx > TH.length - 1) idx = TH.length - 1;
-        strip.x = -idx * 640; hit.x = 0;
-        if (TH[idx] !== Doodle.getTheme()) { Doodle.setTheme(TH[idx]); state.game.state.start("Preload"); }
+        // SMOOTH slide-to-snap (tween, no instant jump/blink)
+        state.add.tween(strip).to({ x: -idx * 640 }, 220, Phaser.Easing.Quadratic.Out, true);
+        hit.x = 0;
+        if (TH[idx] !== Doodle.getTheme()) {
+          Doodle.setTheme(TH[idx]);
+          // apply the theme WITHOUT reloading the page (no blink): background-load its assets, then re-skin the menu in place
+          try {
+            var g = state.game;
+            Doodle.loadThemeAssets(g);
+            g.load.onLoadComplete.addOnce(function () {
+              try {
+                if (state.player && state.player.loadTexture) { state.player.loadTexture(Doodle.playerKey()); state.player.frame = 0; }
+                if (Doodle.applyMenuDecor) Doodle.applyMenuDecor(state);
+              } catch (e2) {}
+            });
+            g.load.start();
+          } catch (e1) {}
+        }
       });
     }
   } catch (e) { Doodle._show("applyMenuBg: " + e.message); }
