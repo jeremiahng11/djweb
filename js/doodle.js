@@ -3,16 +3,24 @@ var Doodle = Doodle || {};
 // Responsive height: match the device aspect so the game FILLS the screen (no letterbox bars).
 // Width stays 635 (gameplay is balanced around it); height grows on tall phones -> more vertical room.
 var _djW = 635, _djH = 955;
+var _gp = document.getElementById("gameParent");
+function _djSizeHost() {
+  // On phones, lock the host to window.innerHeight (the TRUE full screen on a standalone PWA).
+  // CSS vh/dvh/lvh all read short of the home-indicator strip on iOS -> that was the bottom black band.
+  // Desktop (>=700px) keeps its phone-shaped CSS box (don't override).
+  try { if (_gp && (window.innerWidth || 0) < 700) _gp.style.height = (window.innerHeight || 852) + "px"; } catch (e) {}
+}
+_djSizeHost();
 try {
-  // Measure the FULL-SCREEN parent (#gameParent is sized to 100vh) rather than window.innerHeight,
-  // which iOS reports short of the physical screen -> that shortfall was the black band at the bottom.
-  // EXACT_FIT then stretches the canvas to fill the parent exactly; matching the aspect avoids distortion.
-  var _gp = document.getElementById("gameParent");
   var _sw = (_gp && _gp.offsetWidth) || window.innerWidth || 393;
   var _sh = (_gp && _gp.offsetHeight) || window.innerHeight || 852;
   _djH = Math.max(955, Math.min(1800, Math.round(_djW * (_sh / _sw))));
 } catch (e) {}
 Doodle.game = new Phaser.Game(_djW, _djH, Phaser.AUTO, "gameParent");
+// keep the host glued to the live viewport (iOS settles it after launch / on rotate) and re-fit the canvas
+function _djOnResize() { _djSizeHost(); try { if (Doodle.game && Doodle.game.scale) Doodle.game.scale.refresh(); } catch (e) {} }
+window.addEventListener("resize", _djOnResize);
+window.addEventListener("orientationchange", function () { setTimeout(_djOnResize, 300); });
 Doodle.game.state.add("Boot", Doodle.BootState);
 Doodle.game.state.add("Preload", Doodle.PreloadState);
 Doodle.game.state.add("Game", Doodle.GameState);
