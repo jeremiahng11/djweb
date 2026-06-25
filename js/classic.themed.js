@@ -2,9 +2,9 @@ var Doodle = Doodle || {};
 
 Doodle.BootState = {
     init: function() {
-        // EXACT_FIT re-fills the #gameParent on every resize (no gap can reappear when iOS changes the viewport after load).
-        // No distortion: the game height already matches the parent's aspect (full screen on mobile, phone-shaped box on desktop).
-        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT, this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        // SHOW_ALL = never distort the art (correct proportions). Game height is measured from #gameParent, which
+        // already includes the home-indicator strip (+env(safe-area-inset-bottom)), so it fills with no gap and at worst a thin border.
+        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL, this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
         var _g = this.game;
         // safe-area insets (status bar / home indicator) in GAME units, so the HUD clears them under viewport-fit=cover
         Doodle.safeTop = 0; Doodle.safeBot = 0;
