@@ -2,8 +2,8 @@ var Doodle = Doodle || {};
 
 Doodle.BootState = {
     init: function() {
-        // EXACT_FIT stretches the canvas to fill the viewport on every resize -> guarantees NO blank band, ever
-        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT, this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        // SHOW_ALL fills the #gameParent exactly (game height already matches the parent aspect) and centers it as a phone on desktop
+        this.game.stage.disableVisibilityChange = !0, this.game.stage.backgroundColor = "#fff", this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL, this.scale.pageAlignHorizontally = !0, this.scale.pageAlignVertically = !0, this.game.physics.startSystem(Phaser.Physics.ARCADE);
         var _g = this.game;
         // safe-area insets (status bar / home indicator) in GAME units, so the HUD clears them under viewport-fit=cover
         Doodle.safeTop = 0; Doodle.safeBot = 0;
@@ -13,7 +13,9 @@ Doodle.BootState = {
             document.body.appendChild(_pr);
             var _cs = window.getComputedStyle(_pr), _st = parseFloat(_cs.paddingTop) || 0, _sb = parseFloat(_cs.paddingBottom) || 0;
             document.body.removeChild(_pr);
-            var _sy = (window.innerHeight || _g.height) / _g.height; // EXACT_FIT vertical scale (display px per game unit)
+            var _gp = document.getElementById("gameParent");
+            var _disp = (_gp && _gp.offsetHeight) || window.innerHeight || _g.height;
+            var _sy = _disp / _g.height; // display px per game unit (SHOW_ALL fills the parent, so this is exact)
             Doodle.safeTop = Math.round(_st / _sy);
             Doodle.safeBot = Math.round(_sb / _sy)
         } catch (_e) {}

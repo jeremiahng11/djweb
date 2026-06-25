@@ -15,8 +15,12 @@
         display: flex; align-items: center; justify-content: center;
       }
       canvas { display: block; }
-      /* full-screen host for the canvas: 100vh is the LARGE viewport (covers the home-indicator strip that innerHeight omits) */
-      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
+      /* MOBILE: fixed full-screen host (covers the home-indicator strip innerHeight omits) */
+      #gameParent { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; overflow: hidden; }
+      /* DESKTOP/tablet: show it as a centered phone-shaped window instead of stretching across the page */
+      @media (min-width: 700px) {
+        #gameParent { position: relative; inset: auto; height: 94vh; max-height: 920px; aspect-ratio: 430 / 880; width: auto; }
+      }
       #highscore { position: absolute; left: -100px; top: -100px; width: 5px; display: none; }
     </style>
     <!-- PWA -->
@@ -80,8 +84,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=142"></script>
-    <script src="js/classic.themed.js?v=142"></script>
-    <script src="js/doodle.js?v=142"></script>
+    <script src="js/classic-theme.js?v=143"></script>
+    <script src="js/classic.themed.js?v=143"></script>
+    <script src="js/doodle.js?v=143"></script>
   </body>
 </html>
