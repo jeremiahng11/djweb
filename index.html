@@ -15,6 +15,8 @@
         display: flex; align-items: center; justify-content: center;
       }
       canvas { display: block; }
+      /* full-screen host for the canvas: 100vh is the LARGE viewport (covers the home-indicator strip that innerHeight omits) */
+      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
       #highscore { position: absolute; left: -100px; top: -100px; width: 5px; display: none; }
     </style>
     <!-- PWA -->
@@ -31,6 +33,7 @@
          For file:// play with no server, use classic-offline.html instead. -->
   </head>
   <body>
+    <div id="gameParent"></div>
     <div id="tapstart" style="position:fixed;inset:0;z-index:99998;background:#1c1c1c;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
       <div style="font-size:38px;font-weight:800;letter-spacing:1px;">doodle jump</div>
       <div style="font-size:22px;margin-top:10px;opacity:.95;animation:djpulse 1.2s ease-in-out infinite;">tap to play</div>
@@ -77,8 +80,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=141"></script>
-    <script src="js/classic.themed.js?v=141"></script>
-    <script src="js/doodle.js?v=141"></script>
+    <script src="js/classic-theme.js?v=142"></script>
+    <script src="js/classic.themed.js?v=142"></script>
+    <script src="js/doodle.js?v=142"></script>
   </body>
 </html>

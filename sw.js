@@ -1,7 +1,7 @@
 // Service worker: makes the online build an installable, offline-capable PWA.
 // Runtime cache-first for GET requests (the game is static), so after the first
 // load it works offline and starts fast. Bump CACHE on each release to refresh.
-var CACHE = "dj-v141";
+var CACHE = "dj-v142";
 
 self.addEventListener("install", function (e) { self.skipWaiting(); });
 
