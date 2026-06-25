@@ -187,7 +187,7 @@ Doodle.applyMenuBg = function (state) {
     var t = Doodle.getTheme();
     // (tiled menu + theme slider show for EVERY theme so you can always drag the slider to change it)
     // swap the menu background to the tiled menu art
-    if (state.bgMenu && Doodle._imgOK(state.game, "mainmenu")) { state.bgMenu.loadTexture("mainmenu"); state.bgMenu.width = 640; state.bgMenu.height = state.game.height; }
+    if (state.bgMenu && Doodle._imgOK(state.game, "mainmenu")) { state.bgMenu.loadTexture("mainmenu"); state.bgMenu.width = 640; state.bgMenu.height = 1800; } // tall NATIVE-scale lined paper (no stretch); bottom crops off on shorter screens
     // play the UFO warning sound once when the themed menu loads
     // UFO sound AUTOPLAYS on menu load: try to resume the (possibly suspended) audio context, then play.
     // Stopped on leaving the menu so a queued play can't bleed into the game start.
@@ -209,14 +209,14 @@ Doodle.applyMenuBg = function (state) {
     // BEHIND the torn-paper bottom edge so it peeks out, like classic Doodle Jump.
     if (Doodle._imgOK(state.game, "themestrip_" + t)) {
       var TH = Doodle.THEMES, curIdx = TH.indexOf(t); if (curIdx < 0) curIdx = 0;
-      var _H = state.game.height, _SY = _H - 128; // slider anchored to the BOTTOM of the (responsive) screen
+      var _SH = 190, _H = state.game.height, _SY = _H - _SH; // TALLER slider anchored to the bottom -> bigger swipe target
       // CAROUSEL: every theme's preview laid out in a row, the current one centered.
       // Drag the slider left/right -> the neighbouring themes slide in (you see what you're picking).
       var strip = state.add.group();
       TH.forEach(function (thm, i) {
         var key = "themestrip_" + thm;
         if (!Doodle._imgOK(state.game, key)) return;
-        var sp = strip.create(i * 640, _SY, key); sp.width = 640; sp.height = 128;
+        var sp = strip.create(i * 640, _SY, key); sp.width = 640; sp.height = _SH;
       });
       strip.x = -curIdx * 640;
       if (Doodle._imgOK(state.game, "menutorn")) {
@@ -224,16 +224,27 @@ Doodle.applyMenuBg = function (state) {
       }
       // invisible drag handle on top; moving it scrolls the strip, releasing snaps to a theme
       var hit = state.add.sprite(0, _SY, "themestrip_" + t);
-      hit.width = 640; hit.height = 128; hit.alpha = 0;
+      hit.width = 640; hit.height = _SH; hit.alpha = 0;
       hit.inputEnabled = true; hit.input.enableDrag(); hit.input.allowVerticalDrag = false;
-      var _base = strip.x, _minX = -(TH.length - 1) * 640;
+      var _minX = -(TH.length - 1) * 640;
+      var _dStartX = strip.x, _hStartX = 0, _startIdx = curIdx, _vel = 0, _vPrevX = strip.x, _vPrevT = 0;
+      hit.events.onDragStart.add(function () {
+        if (state._stripTween && state._stripTween.isRunning) state._stripTween.stop();
+        _dStartX = strip.x; _hStartX = hit.x; _startIdx = Math.round(-strip.x / 640);
+        _vel = 0; _vPrevX = strip.x; _vPrevT = state.game.time.now;
+      });
       hit.events.onDragUpdate.add(function () {
-        var x = _base + hit.x; if (x > 0) x = 0; if (x < _minX) x = _minX; strip.x = x;
+        var x = _dStartX + (hit.x - _hStartX); if (x > 0) x = 0; if (x < _minX) x = _minX; strip.x = x;
+        var now = state.game.time.now, dt = now - _vPrevT;
+        if (dt > 0) { _vel = (x - _vPrevX) / dt; _vPrevX = x; _vPrevT = now; }
       });
       hit.events.onDragStop.add(function () {
-        var idx = Math.round(-strip.x / 640); if (idx < 0) idx = 0; if (idx > TH.length - 1) idx = TH.length - 1;
+        var idx;
+        if (Math.abs(_vel) > 0.45) idx = _vel < 0 ? _startIdx + 1 : _startIdx - 1; // FLICK: a quick push+release advances one in that direction (even if < 50%)
+        else idx = Math.round(-strip.x / 640);                                      // SLOW drag: nearest panel -> >=50% advances, <50% slides back
+        if (idx < 0) idx = 0; if (idx > TH.length - 1) idx = TH.length - 1;
         // SMOOTH slide-to-snap (eased tween, no instant jump)
-        state.add.tween(strip).to({ x: -idx * 640 }, 260, Phaser.Easing.Sinusoidal.Out, true);
+        state._stripTween = state.add.tween(strip).to({ x: -idx * 640 }, 260, Phaser.Easing.Sinusoidal.Out, true);
         hit.x = 0;
         if (TH[idx] !== Doodle.getTheme()) {
           Doodle.setTheme(TH[idx]);

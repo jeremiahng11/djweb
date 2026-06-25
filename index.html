@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
     />
     <title>Doodle Jump</title>
     <style>
       html, body {
         margin: 0; padding: 0; width: 100%; height: 100%;
-        background: #66a3d2; overflow: hidden;
+        background: #1c1c1c; overflow: hidden;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         display: flex; align-items: center; justify-content: center;
       }
@@ -18,7 +18,7 @@
       #highscore { position: absolute; left: -100px; top: -100px; width: 5px; display: none; }
     </style>
     <!-- PWA -->
-    <meta name="theme-color" content="#66a3d2" />
+    <meta name="theme-color" content="#1c1c1c" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -31,7 +31,7 @@
          For file:// play with no server, use classic-offline.html instead. -->
   </head>
   <body>
-    <div id="tapstart" style="position:fixed;inset:0;z-index:99998;background:#66a3d2;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+    <div id="tapstart" style="position:fixed;inset:0;z-index:99998;background:#1c1c1c;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
       <div style="font-size:38px;font-weight:800;letter-spacing:1px;">doodle jump</div>
       <div style="font-size:22px;margin-top:10px;opacity:.95;animation:djpulse 1.2s ease-in-out infinite;">tap to play</div>
       <div style="font-size:14px;margin-top:22px;opacity:.75;line-height:1.6;">tilt your phone &nbsp;·&nbsp; or touch &amp; drag<br/>to move left / right</div>
@@ -77,8 +77,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=134"></script>
-    <script src="js/classic.themed.js?v=134"></script>
-    <script src="js/doodle.js?v=134"></script>
+    <script src="js/classic-theme.js?v=135"></script>
+    <script src="js/classic.themed.js?v=135"></script>
+    <script src="js/doodle.js?v=135"></script>
   </body>
 </html>
