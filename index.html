@@ -17,7 +17,7 @@
       canvas { display: block; }
       /* MOBILE: fixed full-screen host. iOS PWA stops 100vh at the home-indicator safe area, so extend PAST it
          with env(safe-area-inset-bottom) so the canvas covers that strip too (no bottom gap). */
-      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: calc(100dvh + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
+      #gameParent { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: calc(100vh + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
       /* DESKTOP/tablet: show it as a centered phone-shaped window instead of stretching across the page */
       @media (min-width: 700px) {
         #gameParent { position: relative; inset: auto; height: 94vh; max-height: 920px; aspect-ratio: 430 / 880; width: auto; }
@@ -85,8 +85,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=144"></script>
-    <script src="js/classic.themed.js?v=144"></script>
-    <script src="js/doodle.js?v=144"></script>
+    <script src="js/classic-theme.js?v=145"></script>
+    <script src="js/classic.themed.js?v=145"></script>
+    <script src="js/doodle.js?v=145"></script>
   </body>
 </html>
