@@ -641,8 +641,25 @@ Doodle.setPageBgScene = function (color) {
   } catch (e) { Doodle.setPageBg(color); }
 };
 
+// Measure the safe-area insets in GAME units. Read LATE (in each state's create) via the persistent #safeprobe,
+// because env(safe-area-inset-*) is often 0 at boot before iOS resolves the PWA chrome.
+Doodle.computeSafeInsets = function (game) {
+  try {
+    var pr = document.getElementById("safeprobe"), st = 0, sb = 0;
+    if (pr) { var cs = window.getComputedStyle(pr); st = parseFloat(cs.paddingTop) || 0; sb = parseFloat(cs.paddingBottom) || 0; }
+    var gp = document.getElementById("gameParent");
+    var gh = (game && game.height) || 955;
+    var disp = (gp && gp.offsetHeight) || window.innerHeight || gh;
+    var sy = disp / gh;
+    if (sy > 0) { Doodle.safeTop = Math.round(st / sy); Doodle.safeBot = Math.round(sb / sy); }
+  } catch (e) {}
+  if (typeof Doodle.safeTop !== "number") Doodle.safeTop = 0;
+  if (typeof Doodle.safeBot !== "number") Doodle.safeBot = 0;
+};
+
 // Fill a sub-screen (scores / options / calibrate) with full-height lined paper so there's no empty band below.
 Doodle.fillSubBg = function (state) {
+  Doodle.computeSafeInsets(state.game);
   Doodle.setPageBg("#f7efe7"); // lined-paper cream under the home indicator
   try {
     if (!Doodle._imgOK(state.game, "linedbg")) return;

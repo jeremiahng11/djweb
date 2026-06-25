@@ -176,6 +176,7 @@ Doodle.GameState = {
         "{}" == JSON.stringify(Doodle.GameState.GYRO_SENSE) && (this.GYRO_SENSE = 40)
     },
     create: function() {
+        Doodle.computeSafeInsets(this.game);
         enterKey = this.game.input.keyboard.addKey(Phaser.Keyboard.ENTER), enterKey.onDown.add(function() {
             document.getElementById("highscore").blur()
         }, this), spaceBar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR), spaceBar.onDown.add(this.playerShoot, this);
@@ -449,6 +450,7 @@ var Doodle = Doodle || {};
 Doodle.MenuState = {
     init: function() {},
     create: function() {
+        Doodle.computeSafeInsets(this.game);
         this.jumpSound = this.add.audio("jump"), this.game.world.setBounds(0, 0, 640, this.game.height), this.game.physics.arcade.gravity.y = 1728, this.bgMenu = this.add.sprite(0, 0, "atlas3", "bgMenu"), Doodle.applyMenuBg(this);
         var a = [];
         this.game.device.android ? a = [1] : this.game.device.iOS ? a = [0] : this.game.device.iOS || (a = [0, 1]);
