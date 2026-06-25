@@ -1,0 +1,18 @@
+{
+   "action": {
+      "default_icon": "image/48.png",
+      "default_popup": "doodle.html",
+      "default_title": "Doodle Jump Original Classic Game"
+   },
+   "description": "Play Doodle Jump game in chrome browser in just one toolbar click",
+   "icons": {
+      "128": "image/128.png",
+      "32": "image/32.png",
+      "48": "image/48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg0/YiqORgkeqlU951q3kfjHYYYs/ravLkvAQm7tvowtMALV70eIRKSm+M8ckgvTN+TjVlVDn4kR9w7Ybms7QA2L4izNJKsXZNTBz8iJJdWxKu/aiBlg1iac77cn/N5YTLiBF2jSTLE09NRKgXtyqtkaPeyJ044EIJTTIivcuuFaXUwSnnczfYzCBH77jQo5sqYYkb0k3gybypdJ0poiAG00JzPXlApo5TGwXej/lyHvcSc1lWgxIJjiIVSURQU8G8Wdnpz1NzrNtZ6CBogXzDN6MWAFn+ZB7AuHCPcAgHyDFmmqYZJ7FcjWdAeqS0yS3m8LyOPnkMm9P7+smfeUeDQIDAQAB",
+   "manifest_version": 3,
+   "name": "Doodle Jump",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0.2"
+}

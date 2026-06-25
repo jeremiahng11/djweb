@@ -1,0 +1,14 @@
+{
+"objects/springshoes-powerup":6,
+"objects/pacman-powerup":250,
+"objects/rockets/rocket-1":251,
+"objects/rockets/rocket-2":252,
+"objects/rockets/rocket-3":253,
+"objects/rockets/rocket-4":254,
+"objects/rockets/rocket-5":255,
+"monsters/chomp":205,
+"monsters/spider":206,
+"monsters/ufo":207
+}
+
+

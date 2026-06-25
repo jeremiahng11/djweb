@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>Doodle Jump</title>
+    <style>
+      html, body {
+        margin: 0; padding: 0; width: 100%; height: 100%;
+        background: #111; overflow: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+        display: flex; align-items: center; justify-content: center;
+      }
+      /* Canvas is 635x955; scale to fit the viewport, preserving aspect. */
+      #game {
+        display: block;
+        height: 100vh;
+        max-height: 100vh;
+        width: auto;
+        max-width: 100vw;
+        touch-action: none;
+        image-rendering: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <script src="js/dj/rect.js?v=2"></script>
+    <script src="js/dj/assets.js?v=2"></script>
+    <script src="js/dj/core.js?v=2"></script>
+    <script src="js/dj/player.js?v=2"></script>
+    <script src="js/dj/powerups.js?v=2"></script>
+    <script src="js/dj/tiles.js?v=2"></script>
+    <script src="js/dj/enemies.js?v=2"></script>
+    <script src="js/dj/ui.js?v=2"></script>
+    <script src="js/dj/game.js?v=2"></script>
+    <script>
+      DJ.boot(document.getElementById("game")).catch(function (e) {
+        console.error("Doodle Jump failed to start:", e);
+        document.body.innerHTML =
+          '<pre style="color:#f88;font:14px monospace;padding:20px">' +
+          (e && e.stack ? e.stack : e) + "</pre>";
+      });
+    </script>
+  </body>
+</html>

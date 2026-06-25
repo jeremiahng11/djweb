@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>Doodle Jump</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #66a3d2;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+      }
+      /* Center the Phaser canvas in the viewport. SHOW_ALL scaling in the
+         game keeps the 635x955 aspect ratio and fits it to the window. */
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      canvas {
+        display: block;
+      }
+      /* Hidden input the game uses for high-score name entry. */
+      #highscore {
+        position: absolute;
+        left: -100px;
+        top: -100px;
+        width: 5px;
+        display: none;
+      }
+    </style>
+    <script src="js/perf.js"></script>
+    <script src="js/lib/phaser.min.js"></script>
+  </head>
+
+  <body>
+    <input id="highscore" type="text" />
+    <script src="js/fulltilt.min.js"></script>
+    <script src="js/production.min.js"></script>
+    <script src="js/doodle.js"></script>
+  </body>
+</html>

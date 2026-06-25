@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -oE \"scaleMode[^;]{0,40}\" js/production.min.js)",
+      "Read(//private/tmp/**)",
+      "Bash(jobs)",
+      "Bash(curl -sv http://127.0.0.1:8753/style.css)",
+      "Read(//tmp/**)",
+      "Bash(pkill -f \"http.server 8753\")",
+      "Bash(grep -oE \"transformUrl[^}]{0,160}\" js/lib/phaser.min.js)",
+      "Bash(awk '{print $5\"  \"$9}')",
+      "Bash(grep -oE \"\\(forceSingleUpdate|desiredFps|antialias|renderType|clearBeforeRender|roundPixels|\\\\.fps|time\\\\.advancedTiming|RETRO|RenderTexture|BitmapData|getImageData|generateTexture|smoothed\\)[^;,\\)]{0,30}\" js/production.min.js)",
+      "Bash(grep -oE \"new Phaser\\\\.Game[^;]{0,80}\" js/production.min.js)"
+    ]
+  }
+}
