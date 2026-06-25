@@ -8,8 +8,8 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # the game itself (index.html, js/, static/) -> web root
 COPY . /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 3000
 
 # basic container healthcheck (Coolify will also use the proxy health)
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD wget -q -O /dev/null http://127.0.0.1/index.html || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1:3000/index.html || exit 1

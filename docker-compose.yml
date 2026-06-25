@@ -4,5 +4,5 @@ services:
     build: .
     image: djweb:latest
     ports:
-      - "8080:80"
+      - "8080:3000"
     restart: unless-stopped
