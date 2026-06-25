@@ -10,7 +10,20 @@ Doodle.BootState = {
             var s = Math.max(vw / _g.width, vh / _g.height);
             _g.scale.setUserScale(s, s);
         };
-        _fit(); window.addEventListener("resize", _fit); window.addEventListener("orientationchange", _fit)
+        _fit(); window.addEventListener("resize", _fit); window.addEventListener("orientationchange", _fit);
+        // safe-area insets (notch / home indicator) + cover-crop, expressed in GAME units, so HUD clears them
+        Doodle.safeTop = 0; Doodle.safeBot = 0;
+        try {
+            var _pr = document.createElement("div");
+            _pr.style.cssText = "position:fixed;top:0;left:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)";
+            document.body.appendChild(_pr);
+            var _cs = window.getComputedStyle(_pr), _st = parseFloat(_cs.paddingTop) || 0, _sb = parseFloat(_cs.paddingBottom) || 0;
+            document.body.removeChild(_pr);
+            var _us = Math.max((window.innerWidth || _g.width) / _g.width, (window.innerHeight || _g.height) / _g.height);
+            var _ct = Math.max(0, (_g.height * _us - (window.innerHeight || _g.height)) / 2);
+            Doodle.safeTop = Math.round((_ct + _st) / _us);
+            Doodle.safeBot = Math.round((_ct + _sb) / _us)
+        } catch (_e) {}
     },
     preload: function() {
         this.load.image("loadingscreen", "static/images/Preloader2.png"), this.load.image("cloudgameslogo", "static/images/Preloader21.png"), this.load.image("limaskylogo", "static/images/Preloader22.png")
@@ -188,12 +201,12 @@ Doodle.GameState = {
             5 == this.menuButton.frame && (this.adTriggered ? (this.state.start("Menu"), this.menuButton.loadTexture("atlas", "menu_01"), this.writeScore()) : (this.adTriggered = !0))
         }, this), this.menuButton.events.onInputDown.add(function() {
             this.menuButton.loadTexture("atlas", "menu_02")
-        }, this), this.panel = this.add.sprite(0, -23, "atlas", "top"), this.panel.fixedToCamera = !0, this.panel.alpha = .55, Doodle.applyTopBar(this);
-        this.coinsCountLabel = this.add.bitmapText(15, 16, "DoodleFont", "0", 56), this.coinsCountLabel.fixedToCamera = !0, this.coinsCountLabel.fontWeight = "bold", this.background = this.add.sprite(0, 0, "atlas2", "background"), this.background.fixedToCamera = !0, this.game.world.sendToBack(this.background), Doodle._applyBg(this), this.background.width = this.game.width, this.background.height = this.game.height, Doodle.startComets(this), Doodle.startPlanets(this), this.precedingPlatform = {
+        }, this), this.panel = this.add.sprite(0, -23 + (Doodle.safeTop || 0), "atlas", "top"), this.panel.fixedToCamera = !0, this.panel.alpha = .55, Doodle.applyTopBar(this);
+        this.coinsCountLabel = this.add.bitmapText(15, 16 + (Doodle.safeTop || 0), "DoodleFont", "0", 56), this.coinsCountLabel.fixedToCamera = !0, this.coinsCountLabel.fontWeight = "bold", this.background = this.add.sprite(0, 0, "atlas2", "background"), this.background.fixedToCamera = !0, this.game.world.sendToBack(this.background), Doodle._applyBg(this), this.background.width = this.game.width, this.background.height = this.game.height, Doodle.startComets(this), Doodle.startPlanets(this), this.precedingPlatform = {
             x: this.game.world.centerX,
             y: this.game.world.height - 30,
             hasBonusObject: -1
-        }, this.player = this.add.sprite(this.game.world.centerX, this.game.world.height - 200, Doodle.playerKey()), this.player.anchor.setTo(.5), this.game.physics.arcade.enable(this.player), this.player.body.setSize(60, 90, this.player.width / 2 - 30, this.player.height / 2 - 45 + 20), this.player.body.velocity.y = -1080, this.player.playerTimer = this.game.time.create(!1), this.player.playerTimer.start(), this.trunk = Doodle.makeTrunk(this.game), this.trunk.anchor.setTo(.5), this.player.addChild(this.trunk), this.trunk.visible = !1, this.pauseButton = this.add.sprite(this.game.width - 50, 30, "atlas", "pause"), this.pauseButton.inputEnabled = !0, this.pauseButton.events.onInputDown.add(this.pauseGame, this), this.pauseButton.fixedToCamera = !0, this.pauseButton.hitArea = new Phaser.Rectangle(-15, -15, 53, 60), this.pausePanelGroup = this.add.group(), this.pausePanelGroup.y = this.game.height, this.pauseCover = new Phaser.Sprite(this.game, 0, 0, "atlas3", "pauseCover"), this.pauseCover.fixedToCamera = !0, this.resumeButton = new Phaser.Sprite(this.game, 300, 800, "atlas", "resume_01"), this.resumeButton.fixedToCamera = !0, this.pausePanelGroup.add(this.pauseCover), this.pausePanelGroup.add(this.resumeButton), this.sounds = {}, this.sounds.jump = this.add.audio("jump"), this.sounds.beake_platfrom = this.add.audio("beake_platfrom"), this.sounds.shoot = this.add.audio("shoot"), this.sounds.shoot2 = this.add.audio("shoot2"), this.sounds.spring = this.add.audio("spring"), this.sounds.falling = this.add.audio("falling"), this.sounds.jetpack = this.add.audio("jetpack"), this.sounds.rocket = this.add.audio("rocket"), this.sounds.propeller = this.add.audio("propeller"), this.sounds.monster_warning = this.add.audio("monster_warning"), this.sounds.monster_warning.loop = !0, this.sounds.monster_kill = this.add.audio("monster_kill"), this.sounds.monster_hit = this.add.audio("monster_hit"), this.sounds.jumponmonster = this.add.audio("jumponmonster"), this.sounds.ufo_kill = this.add.audio("ufo_kill"), this.sounds.ufo_warning = this.add.audio("ufo_warning"), this.sounds.ufo_abduct = this.add.audio("ufo_abduct"), this.sounds.black_hole = this.add.audio("black_hole"), this.sounds.white = this.add.audio("white"), this.loadScoreMarks();
+        }, this.player = this.add.sprite(this.game.world.centerX, this.game.world.height - 200, Doodle.playerKey()), this.player.anchor.setTo(.5), this.game.physics.arcade.enable(this.player), this.player.body.setSize(60, 90, this.player.width / 2 - 30, this.player.height / 2 - 45 + 20), this.player.body.velocity.y = -1080, this.player.playerTimer = this.game.time.create(!1), this.player.playerTimer.start(), this.trunk = Doodle.makeTrunk(this.game), this.trunk.anchor.setTo(.5), this.player.addChild(this.trunk), this.trunk.visible = !1, this.pauseButton = this.add.sprite(this.game.width - 50, 30 + (Doodle.safeTop || 0), "atlas", "pause"), this.pauseButton.inputEnabled = !0, this.pauseButton.events.onInputDown.add(this.pauseGame, this), this.pauseButton.fixedToCamera = !0, this.pauseButton.hitArea = new Phaser.Rectangle(-15, -15, 53, 60), this.pausePanelGroup = this.add.group(), this.pausePanelGroup.y = this.game.height, this.pauseCover = new Phaser.Sprite(this.game, 0, 0, "atlas3", "pauseCover"), this.pauseCover.fixedToCamera = !0, this.resumeButton = new Phaser.Sprite(this.game, 300, 800, "atlas", "resume_01"), this.resumeButton.fixedToCamera = !0, this.pausePanelGroup.add(this.pauseCover), this.pausePanelGroup.add(this.resumeButton), this.sounds = {}, this.sounds.jump = this.add.audio("jump"), this.sounds.beake_platfrom = this.add.audio("beake_platfrom"), this.sounds.shoot = this.add.audio("shoot"), this.sounds.shoot2 = this.add.audio("shoot2"), this.sounds.spring = this.add.audio("spring"), this.sounds.falling = this.add.audio("falling"), this.sounds.jetpack = this.add.audio("jetpack"), this.sounds.rocket = this.add.audio("rocket"), this.sounds.propeller = this.add.audio("propeller"), this.sounds.monster_warning = this.add.audio("monster_warning"), this.sounds.monster_warning.loop = !0, this.sounds.monster_kill = this.add.audio("monster_kill"), this.sounds.monster_hit = this.add.audio("monster_hit"), this.sounds.jumponmonster = this.add.audio("jumponmonster"), this.sounds.ufo_kill = this.add.audio("ufo_kill"), this.sounds.ufo_warning = this.add.audio("ufo_warning"), this.sounds.ufo_abduct = this.add.audio("ufo_abduct"), this.sounds.black_hole = this.add.audio("black_hole"), this.sounds.white = this.add.audio("white"), this.loadScoreMarks();
         var a, b = (-1 != navigator.userAgent.indexOf("AppleWebKit"), /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream, new FULLTILT.getDeviceOrientation({
                 type: "world"
             })),
@@ -404,7 +417,7 @@ Doodle.GameState = {
     achieveMentUnlock: function(a, b) {
         if (1 != this.stats.achievements[a][3] && (b || this.achievementsOrder.push(a), null == this.achievementsOrder[1])) {
             this.achievementsGroup = this.add.group();
-            this.achievementName = this.add.bitmapText(this.game.world.width / 2, 1015, "DoodleFont2", this.stats.achievements[a][0], 60), this.achievementName.anchor.setTo(.5), this.achievementHolder = this.add.sprite(this.game.world.width / 2, 1002, "atlas2", "achievementHolder"), this.achievementHolder.anchor.setTo(.5), this.achievementsGroup.add(this.achievementHolder), this.achievementsGroup.add(this.achievementName), this.stats.achievements[a][3] = 1, tween1 = this.game.add.tween(this.achievementsGroup).to({
+            this.achievementName = this.add.bitmapText(this.game.world.width / 2, this.game.height + 55 - (Doodle.safeBot || 0), "DoodleFont2", this.stats.achievements[a][0], 60), this.achievementName.anchor.setTo(.5), this.achievementHolder = this.add.sprite(this.game.world.width / 2, this.game.height + 42 - (Doodle.safeBot || 0), "atlas2", "achievementHolder"), this.achievementHolder.anchor.setTo(.5), this.achievementsGroup.add(this.achievementHolder), this.achievementsGroup.add(this.achievementName), this.stats.achievements[a][3] = 1, tween1 = this.game.add.tween(this.achievementsGroup).to({
                 y: -84
             }, 1e3, Phaser.Easing.Linear.None), tween12 = this.game.add.tween(this.achievementsGroup).to({
                 y: 0
@@ -467,13 +480,13 @@ Doodle.MenuState = {
             this.playButton.loadTexture("atlas", "Play_02")
         }, this), this.playButton.events.onInputOut.add(function() {
             this.playButton.loadTexture("atlas", "Play_01")
-        }, this), this.optionsButton = this.add.sprite(this.world.game.width - 140, this.world.game.height - (Doodle.getTheme() == "default" ? 240 : 320), "atlas2", "opt"), this.optionsButton.inputEnabled = !0, this.optionsButton.events.onInputUp.add(function() {
+        }, this), this.optionsButton = this.add.sprite(this.world.game.width - 140, this.world.game.height - 320 - (Doodle.safeBot || 0), "atlas2", "opt"), this.optionsButton.inputEnabled = !0, this.optionsButton.events.onInputUp.add(function() {
             29 == this.optionsButton.frame && this.state.start("Settings")
         }, this), this.optionsButton.events.onInputDown.add(function() {
             this.optionsButton.loadTexture("atlas2", "opt1")
         }, this), this.optionsButton.events.onInputOut.add(function() {
             this.optionsButton.loadTexture("atlas2", "opt")
-        }, this), this.scoresButton = this.add.sprite(this.world.game.width - 260, this.world.game.height - (Doodle.getTheme() == "default" ? 240 : 320), "atlas2", "opt2"), this.scoresButton.inputEnabled = !0, this.scoresButton.events.onInputUp.add(function() {
+        }, this), this.scoresButton = this.add.sprite(this.world.game.width - 260, this.world.game.height - 320 - (Doodle.safeBot || 0), "atlas2", "opt2"), this.scoresButton.inputEnabled = !0, this.scoresButton.events.onInputUp.add(function() {
             32 == this.scoresButton.frame && this.state.start("Scores")
         }, this), this.scoresButton.events.onInputDown.add(function() {
             this.scoresButton.loadTexture("atlas2", "opt3")

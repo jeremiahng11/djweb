@@ -209,7 +209,7 @@ Doodle.applyMenuBg = function (state) {
     // BEHIND the torn-paper bottom edge so it peeks out, like classic Doodle Jump.
     if (Doodle._imgOK(state.game, "themestrip_" + t)) {
       var TH = Doodle.THEMES, curIdx = TH.indexOf(t); if (curIdx < 0) curIdx = 0;
-      var _SH = 190, _H = state.game.height, _SY = _H - _SH; // TALLER slider anchored to the bottom -> bigger swipe target
+      var _SH = 190, _H = state.game.height, _SY = _H - _SH - (Doodle.safeBot || 0); // TALLER slider anchored to bottom (above home indicator) -> bigger swipe target
       // CAROUSEL: every theme's preview laid out in a row, the current one centered.
       // Drag the slider left/right -> the neighbouring themes slide in (you see what you're picking).
       var strip = state.add.group();
@@ -616,7 +616,7 @@ Doodle.applyTopBar = function (state) {
     var k = "top_" + t;
     if (!d || !d.top || !Doodle._imgOK(state.game, k)) return;
     state.panel.loadTexture(k);
-    state.panel.cameraOffset.set(0, 0); state.panel.y = 0; state.panel.x = 0;
+    state.panel.cameraOffset.set(0, (Doodle.safeTop || 0)); state.panel.y = (Doodle.safeTop || 0); state.panel.x = 0;
     state.panel.width = 640; state.panel.height = 92;
     state.panel.alpha = 1;
   } catch (e) { Doodle._show("applyTopBar: " + e.message); }
