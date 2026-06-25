@@ -32,6 +32,12 @@
   </head>
   <body>
     <div id="err" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#fff;color:#c00;font:12px/1.4 monospace;white-space:pre-wrap;padding:10px;max-height:60%;overflow:auto;display:none"></div>
+    <div id="tapstart" style="position:fixed;inset:0;z-index:99998;background:#66a3d2;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+      <div style="font-size:38px;font-weight:800;letter-spacing:1px;">doodle jump</div>
+      <div style="font-size:22px;margin-top:10px;opacity:.95;animation:djpulse 1.2s ease-in-out infinite;">tap to play</div>
+      <div style="font-size:14px;margin-top:22px;opacity:.75;line-height:1.6;">tilt your phone &nbsp;·&nbsp; or touch &amp; drag<br/>to move left / right</div>
+      <style>@keyframes djpulse{0%,100%{opacity:.55}50%{opacity:1}}</style>
+    </div>
     <script>
       (function () {
         function show(msg) { var d = document.getElementById("err"); if (d) { d.style.display = "block"; d.textContent += msg + "\n"; } }
@@ -45,16 +51,29 @@
       // PWA service worker (installable + offline after first load)
       if ("serviceWorker" in navigator)
         window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
-      // iOS 13+ needs a gesture-driven permission before tilt (gyro) events fire
+      // iOS 13+ needs a gesture-driven permission before tilt (gyro) events fire (guarded so it only asks once)
       (function () {
-        function reqTilt() {
+        var asked = false;
+        window.__djReqTilt = function () {
+          if (asked) return; asked = true;
           try {
             if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === "function")
               DeviceOrientationEvent.requestPermission().catch(function () {});
           } catch (e) {}
+        };
+        window.addEventListener("touchend", window.__djReqTilt, { once: true });
+        window.addEventListener("mousedown", window.__djReqTilt, { once: true });
+      })();
+      // tap-to-start overlay: one clean gesture grants iOS motion permission + unlocks audio, then reveals the game
+      (function () {
+        var ov = document.getElementById("tapstart"); if (!ov) return;
+        function go() {
+          if (window.__djReqTilt) window.__djReqTilt();
+          try { var g = window.Doodle && window.Doodle.game; if (g && g.sound && g.sound.context && g.sound.context.resume) g.sound.context.resume(); } catch (e) {}
+          ov.style.display = "none";
         }
-        window.addEventListener("touchend", reqTilt, { once: true });
-        window.addEventListener("mousedown", reqTilt, { once: true });
+        ov.addEventListener("click", go);
+        ov.addEventListener("touchend", function (e) { e.preventDefault(); go(); }, { passive: false });
       })();
     </script>
     <input id="highscore" type="text" />
