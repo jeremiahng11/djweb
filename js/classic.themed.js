@@ -99,7 +99,7 @@ Doodle.GameState = {
 
         this.adTriggered = !1;
         this.dontPlaysound = !1;
-        this.game.world.setBounds(0, 0, 640, 960);
+        this.game.world.setBounds(0, 0, 640, this.game.height);
         this.widthPlat = 114;
         this.stats = JSON.parse(localStorage.getItem("DJ_stats")) || JSON.parse(this.game.cache.getText("stats")), this.stats.achievements && this.stats.achievements.length < 20 && this.stats.achievements.push(["monster rocketier", "Fly into a monster with a rocket", 0, 0]);
 
@@ -181,7 +181,7 @@ Doodle.GameState = {
         }, this), this.menuButton.events.onInputDown.add(function() {
             this.menuButton.loadTexture("atlas", "menu_02")
         }, this), this.panel = this.add.sprite(0, -23, "atlas", "top"), this.panel.fixedToCamera = !0, this.panel.alpha = .55, Doodle.applyTopBar(this);
-        this.coinsCountLabel = this.add.bitmapText(15, 16, "DoodleFont", "0", 56), this.coinsCountLabel.fixedToCamera = !0, this.coinsCountLabel.fontWeight = "bold", this.background = this.add.sprite(0, 0, "atlas2", "background"), this.background.fixedToCamera = !0, this.game.world.sendToBack(this.background), Doodle._applyBg(this), Doodle.startComets(this), Doodle.startPlanets(this), this.precedingPlatform = {
+        this.coinsCountLabel = this.add.bitmapText(15, 16, "DoodleFont", "0", 56), this.coinsCountLabel.fixedToCamera = !0, this.coinsCountLabel.fontWeight = "bold", this.background = this.add.sprite(0, 0, "atlas2", "background"), this.background.fixedToCamera = !0, this.game.world.sendToBack(this.background), Doodle._applyBg(this), this.background.width = this.game.width, this.background.height = this.game.height, Doodle.startComets(this), Doodle.startPlanets(this), this.precedingPlatform = {
             x: this.game.world.centerX,
             y: this.game.world.height - 30,
             hasBonusObject: -1
@@ -432,7 +432,7 @@ var Doodle = Doodle || {};
 Doodle.MenuState = {
     init: function() {},
     create: function() {
-        this.jumpSound = this.add.audio("jump"), this.game.world.setBounds(0, 0, 640, 960), this.game.physics.arcade.gravity.y = 1728, this.bgMenu = this.add.sprite(0, 0, "atlas3", "bgMenu"), Doodle.applyMenuBg(this);
+        this.jumpSound = this.add.audio("jump"), this.game.world.setBounds(0, 0, 640, this.game.height), this.game.physics.arcade.gravity.y = 1728, this.bgMenu = this.add.sprite(0, 0, "atlas3", "bgMenu"), Doodle.applyMenuBg(this);
         var a = [];
         this.game.device.android ? a = [1] : this.game.device.iOS ? a = [0] : this.game.device.iOS || (a = [0, 1]);
         for (var b = 0; b < a.length; b++) {

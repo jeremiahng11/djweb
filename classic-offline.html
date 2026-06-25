@@ -20,8 +20,8 @@
     <script src="js/perf.js"></script>
     <script src="js/lib/phaser.min.js"></script>
     <!-- OFFLINE build: assets inlined as data-URIs so it runs straight from file:// (no server) -->
-    <script src="js/offline-assets.js?v=133"></script>
-    <script src="js/offline-shim.js?v=133"></script>
+    <script src="js/offline-assets.js?v=134"></script>
+    <script src="js/offline-shim.js?v=134"></script>
   </head>
   <body>
     <div id="err" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#fff;color:#c00;font:12px/1.4 monospace;white-space:pre-wrap;padding:10px;max-height:60%;overflow:auto;display:none"></div>
@@ -32,7 +32,8 @@
           show("ERROR: " + (e.message || (e.error && e.error.message) || e.error) + "  @ " + (e.filename || "") + ":" + (e.lineno || "") + ":" + (e.colno || ""));
           if (e.error && e.error.stack) show(String(e.error.stack).split("\n").slice(0, 4).join("\n"));
         });
-        window.addEventListener("unhandledrejection", function (e) { show("PROMISE: " + (e.reason && e.reason.message ? e.reason.message : e.reason)); });
+        // gyro library (FULLTILT) rejects a promise on every motion event -> swallow it (console only) so it doesn't flood the screen
+        window.addEventListener("unhandledrejection", function (e) { try { console.warn("PROMISE:", e.reason && e.reason.message ? e.reason.message : e.reason); } catch (x) {} if (e.preventDefault) e.preventDefault(); });
         window.__DJ_DIAG = true;
         // Silent safety net: only show the bar if the inlined assets failed to load.
         window.addEventListener("DOMContentLoaded", function () {
@@ -45,8 +46,8 @@
     </script>
     <input id="highscore" type="text" />
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=133"></script>
-    <script src="js/classic.themed.js?v=133"></script>
-    <script src="js/doodle.js?v=133"></script>
+    <script src="js/classic-theme.js?v=134"></script>
+    <script src="js/classic.themed.js?v=134"></script>
+    <script src="js/doodle.js?v=134"></script>
   </body>
 </html>

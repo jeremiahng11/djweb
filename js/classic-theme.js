@@ -187,7 +187,7 @@ Doodle.applyMenuBg = function (state) {
     var t = Doodle.getTheme();
     // (tiled menu + theme slider show for EVERY theme so you can always drag the slider to change it)
     // swap the menu background to the tiled menu art
-    if (state.bgMenu && Doodle._imgOK(state.game, "mainmenu")) { state.bgMenu.loadTexture("mainmenu"); state.bgMenu.width = 640; state.bgMenu.height = 960; }
+    if (state.bgMenu && Doodle._imgOK(state.game, "mainmenu")) { state.bgMenu.loadTexture("mainmenu"); state.bgMenu.width = 640; state.bgMenu.height = state.game.height; }
     // play the UFO warning sound once when the themed menu loads
     // UFO sound AUTOPLAYS on menu load: try to resume the (possibly suspended) audio context, then play.
     // Stopped on leaving the menu so a queued play can't bleed into the game start.
@@ -209,20 +209,21 @@ Doodle.applyMenuBg = function (state) {
     // BEHIND the torn-paper bottom edge so it peeks out, like classic Doodle Jump.
     if (Doodle._imgOK(state.game, "themestrip_" + t)) {
       var TH = Doodle.THEMES, curIdx = TH.indexOf(t); if (curIdx < 0) curIdx = 0;
+      var _H = state.game.height, _SY = _H - 128; // slider anchored to the BOTTOM of the (responsive) screen
       // CAROUSEL: every theme's preview laid out in a row, the current one centered.
       // Drag the slider left/right -> the neighbouring themes slide in (you see what you're picking).
       var strip = state.add.group();
       TH.forEach(function (thm, i) {
         var key = "themestrip_" + thm;
         if (!Doodle._imgOK(state.game, key)) return;
-        var sp = strip.create(i * 640, 827, key); sp.width = 640; sp.height = 128;
+        var sp = strip.create(i * 640, _SY, key); sp.width = 640; sp.height = 128;
       });
       strip.x = -curIdx * 640;
       if (Doodle._imgOK(state.game, "menutorn")) {
-        var _tn = state.add.sprite(0, 814, "menutorn"); _tn.width = 640; _tn.height = 82;       // torn-paper edge stays fixed; previews slide under it
+        var _tn = state.add.sprite(0, _SY - 13, "menutorn"); _tn.width = 640; _tn.height = 82;   // torn-paper edge stays fixed; previews slide under it
       }
       // invisible drag handle on top; moving it scrolls the strip, releasing snaps to a theme
-      var hit = state.add.sprite(0, 827, "themestrip_" + t);
+      var hit = state.add.sprite(0, _SY, "themestrip_" + t);
       hit.width = 640; hit.height = 128; hit.alpha = 0;
       hit.inputEnabled = true; hit.input.enableDrag(); hit.input.allowVerticalDrag = false;
       var _base = strip.x, _minX = -(TH.length - 1) * 640;
@@ -231,23 +232,27 @@ Doodle.applyMenuBg = function (state) {
       });
       hit.events.onDragStop.add(function () {
         var idx = Math.round(-strip.x / 640); if (idx < 0) idx = 0; if (idx > TH.length - 1) idx = TH.length - 1;
-        // SMOOTH slide-to-snap (tween, no instant jump/blink)
-        state.add.tween(strip).to({ x: -idx * 640 }, 220, Phaser.Easing.Quadratic.Out, true);
+        // SMOOTH slide-to-snap (eased tween, no instant jump)
+        state.add.tween(strip).to({ x: -idx * 640 }, 260, Phaser.Easing.Sinusoidal.Out, true);
         hit.x = 0;
         if (TH[idx] !== Doodle.getTheme()) {
           Doodle.setTheme(TH[idx]);
-          // apply the theme WITHOUT reloading the page (no blink): background-load its assets, then re-skin the menu in place
-          try {
-            var g = state.game;
-            Doodle.loadThemeAssets(g);
-            g.load.onLoadComplete.addOnce(function () {
-              try {
-                if (state.player && state.player.loadTexture) { state.player.loadTexture(Doodle.playerKey()); state.player.frame = 0; }
-                if (Doodle.applyMenuDecor) Doodle.applyMenuDecor(state);
-              } catch (e2) {}
-            });
-            g.load.start();
-          } catch (e1) {}
+          // DEFER the (heavy) asset load until swiping settles, so the swipe itself stays buttery — no mid-swipe hitch.
+          // Debounced: rapid swipes only load the final theme. Then re-skin the menu in place (no page reload / blink).
+          if (state._themeLoadT) clearTimeout(state._themeLoadT);
+          state._themeLoadT = setTimeout(function () {
+            try {
+              var g = state.game;
+              Doodle.loadThemeAssets(g);
+              g.load.onLoadComplete.addOnce(function () {
+                try {
+                  if (state.player && state.player.loadTexture) { state.player.loadTexture(Doodle.playerKey()); state.player.frame = 0; }
+                  if (Doodle.applyMenuDecor) Doodle.applyMenuDecor(state);
+                } catch (e2) {}
+              });
+              g.load.start();
+            } catch (e1) {}
+          }, 550);
         }
       });
     }
