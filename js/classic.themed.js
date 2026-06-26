@@ -600,11 +600,11 @@ Doodle.ScoresState = {
             this.setState("achievements")
         }, this), this.stats.achievements.forEach(function(a, b) {
             0 == a[3] ? icon = this.add.sprite(115, 285 + 105 * b, "atlas2", "ach") : icon = this.add.sprite(115, 285 + 105 * b, "atlas2", 19 == b ? "ach16" : "ach" + b), this.achievementsGroup.add(icon)
-        }, this), this.scrollMenu.add(this.backgroundScores), this.scrollMenu.add(this.scoresBtn), this.scrollMenu.add(this.statsBtn), this.scrollMenu.add(this.achievementsBtn), this.scrollMenu.add(this.achievementsGroup), this.scrollMenu2.add(this.backgroundScores2), this.achievementsGroup.visible = !1, this.background = this.add.sprite(0, 0, "atlas3", "scores"), Doodle.fillSubBg(this), this.globalButton = this.add.sprite(460, 755, "atlas2", "globalBtn"), this.globalButton.inputEnabled = !0, this.globalButton.events.onInputDown.add(function() {
+        }, this), this.scrollMenu.add(this.backgroundScores), this.scrollMenu.add(this.scoresBtn), this.scrollMenu.add(this.statsBtn), this.scrollMenu.add(this.achievementsBtn), this.scrollMenu.add(this.achievementsGroup), this.scrollMenu2.add(this.backgroundScores2), this.achievementsGroup.visible = !1, this.background = this.add.sprite(0, 0, "atlas3", "scores"), Doodle.fillSubBg(this), this.globalButton = this.add.sprite(460, this.game.height - 235, "atlas2", "globalBtn"), this.globalButton.inputEnabled = !0, this.globalButton.events.onInputDown.add(function() {
             this.setLoad("global")
-        }, this), this.localButton = this.add.sprite(320, 755, "atlas2", "localBtn"), this.localButton.inputEnabled = !0, this.localButton.events.onInputDown.add(function() {
+        }, this), this.localButton = this.add.sprite(320, this.game.height - 235, "atlas2", "localBtn"), this.localButton.inputEnabled = !0, this.localButton.events.onInputDown.add(function() {
             this.setLoad("local")
-        }, this), this.menuButton = new Phaser.Sprite(this.game, 370, 860, "atlas", "menu_01"), this.menuButton.inputEnabled = !0, this.menuButton.events.onInputOut.add(function() {
+        }, this), this.menuButton = new Phaser.Sprite(this.game, 370, this.game.height - 120, "atlas", "menu_01"), this.menuButton.inputEnabled = !0, this.menuButton.events.onInputOut.add(function() {
             this.menuButton.loadTexture("atlas", "menu_01")
         }, this), this.menuButton.events.onInputUp.add(function() {
             5 == this.menuButton.frame && (this.state.start("Menu"), this.menuButton.loadTexture("atlas", "menu_01"))
@@ -710,6 +710,13 @@ Doodle.SettingsState = {
         this.themesBtn.anchor.setTo(0.5);
         this.themesBtn.inputEnabled = true;
         this.themesBtn.events.onInputUp.add(function() { self.state.start("Themes"); }, this);
+        // spread the option rows down the (taller) screen instead of clustering at the top
+        var H = this.game.height, P = function (el, y) { if (el) el.y = Math.round(y); };
+        P(this.dirShoot, H * 0.16); P(this.dirShootButton, H * 0.16 + 40);
+        P(this.themesBtn, H * 0.33);
+        P(this.soundToggler, H * 0.50); P(this.soundButton, H * 0.50 + 40);
+        P(this.calibrate, H * 0.67); P(this.calibrateButton, H * 0.67 + 40);
+        P(this.menuButton, H * 0.85);
     },
     toggleSound: function(a) {
         if (a) {
