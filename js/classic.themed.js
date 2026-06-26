@@ -410,6 +410,7 @@ Doodle.GameState = {
         } catch (a) {
             console.log("Progress not saved")
         }
+        try { Doodle.submitScore(this.name, this.score, Doodle.getTheme()) } catch (e) {}
     },
     achieveMentUnlock: function(a, b) {
         if (1 != this.stats.achievements[a][3] && (b || this.achievementsOrder.push(a), null == this.achievementsOrder[1])) {
@@ -658,15 +659,15 @@ Doodle.ScoresState = {
     setLoad: function(a) {
         this.globalButton.loadTexture("atlas2", "globalBtn"), this.localButton.loadTexture("atlas2", "localBtn"), this.scrollMenu.visible = !1, this.scrollMenu2.visible = !1, this.textElements.forEachAlive(function(a) {
             a.kill()
-        }, this), "local" == a && (this.localButton.loadTexture("atlas2", "localBtn1"), this.scrollMenu.visible = !0, this.setState("score")), "global" == a && (this.globalButton.loadTexture("atlas2", "globalBtn1"), this.scrollMenu2.visible = !0, this.dataTest && this.dataTest.forEach(function(a, b) {
-            this.spawnText(this, 120, 199 + 81 * b, b + 1 + ". " + a[0], 60, "left", {
-                x: 0,
-                y: 0
-            }), this.spawnText(this, 620, 199 + 81 * b, a[1], 60, "right", {
-                x: 1,
-                y: 0
-            })
-        }, this))
+        }, this), "local" == a && (this.localButton.loadTexture("atlas2", "localBtn1"), this.scrollMenu.visible = !0, this.setState("score")), "global" == a && (this.globalButton.loadTexture("atlas2", "globalBtn1"), this.scrollMenu2.visible = !0, function(s) {
+            if (s.dataTest) s.dataTest.length ? s.dataTest.forEach(function(a, b) {
+                s.spawnText(s, 120, 199 + 81 * b, b + 1 + ". " + a[0], 60, "left", { x: 0, y: 0 }), s.spawnText(s, 620, 199 + 81 * b, a[1], 60, "right", { x: 1, y: 0 })
+            }) : s.spawnText(s, 120, 199, "no scores yet", 48, "left", { x: 0, y: 0 });
+            else if (Doodle.API_URL) s.spawnText(s, 120, 199, "loading...", 48, "left", { x: 0, y: 0 }), Doodle.fetchTopScores(function(rows) {
+                s.dataTest = rows || [], s.scrollMenu2 && s.scrollMenu2.visible && s.setLoad("global")
+            }, Doodle.getTheme());
+            else s.spawnText(s, 120, 199, "global scores offline", 48, "left", { x: 0, y: 0 })
+        }(this))
     }
 };
 

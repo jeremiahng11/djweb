@@ -643,6 +643,30 @@ Doodle.setPageBgScene = function (color) {
   } catch (e) { Doodle.setPageBg(color); }
 };
 
+// --- Online leaderboard -------------------------------------------------
+// Set window.DJ_API_URL (in the HTML) to your deployed leaderboard server to enable global scores.
+// When empty, the game stays local-only (no network calls).
+Doodle.API_URL = (typeof window !== "undefined" && window.DJ_API_URL) || "";
+Doodle.submitScore = function (name, score, theme) {
+  if (!Doodle.API_URL) return;
+  try {
+    fetch(Doodle.API_URL + "/api/scores", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: (name || "unnamed").slice(0, 24), score: Math.max(0, Math.round(score) || 0), theme: theme || Doodle.getTheme() }),
+    }).catch(function () {});
+  } catch (e) {}
+};
+Doodle.fetchTopScores = function (cb, theme) {
+  if (!Doodle.API_URL) { cb(null); return; }
+  try {
+    fetch(Doodle.API_URL + "/api/scores/top?limit=10" + (theme ? "&theme=" + encodeURIComponent(theme) : ""))
+      .then(function (r) { return r.json(); })
+      .then(function (d) { cb((d && d.scores) || []); })
+      .catch(function () { cb(null); });
+  } catch (e) { cb(null); }
+};
+
 // Measure the safe-area insets in GAME units. Read LATE (in each state's create) via the persistent #safeprobe,
 // because env(safe-area-inset-*) is often 0 at boot before iOS resolves the PWA chrome.
 Doodle.computeSafeInsets = function (game) {
