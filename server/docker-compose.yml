@@ -1,0 +1,32 @@
+# Local dev: Postgres + the leaderboard API. (On Coolify, create a Postgres service
+# + deploy this folder as an app, and set DATABASE_URL to the Postgres internal URL.)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: doodle
+      POSTGRES_PASSWORD: doodle
+      POSTGRES_DB: doodle
+    ports:
+      - "5432:5432"
+    volumes:
+      - dj_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doodle"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgres://doodle:doodle@db:5432/doodle
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dj_pgdata:
