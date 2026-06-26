@@ -29,8 +29,11 @@ Doodle.THEME_DATA = {
   pirate:      { nose: true,  proj: false, top: true,  suits: ["pirates-cabin-boy","pirates-first-mate","pirates-sailor","pirates-second-mate"] },
   "8bit":      { nose: true,  proj: false, top: false, suits: [] },
 };
-Doodle.THEMES = ["default", "jungle", "space", "ghost", "ice", "bunny",
+// Full roadmap of themes (assets exist but per-theme data isn't finished for most -> they blank in-game).
+Doodle.ALL_THEMES = ["default", "jungle", "space", "ghost", "ice", "bunny",
   "doodlestein", "soccer", "underwater", "snow", "ninja", "pirate", "8bit"];
+// LIVE themes only: what the slider offers + what's playable. Add a theme here once it's fully built + tested.
+Doodle.THEMES = ["default", "space"];
 
 Doodle.getTheme = function () {
   var t = localStorage.getItem("DJ_theme") || "default";
