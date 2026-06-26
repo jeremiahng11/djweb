@@ -4,7 +4,7 @@
 var Doodle = Doodle || {};
 
 Doodle.MP = (function () {
-  var ws = null, myId = null, room = null, ov = null, card = null;
+  var ws = null, myId = null, room = null, ov = null, card = null, pingTimer = null;
   var listeners = {}; // event -> fn
 
   // characters offered in the picker = the doodler roster (theme player sheets)
@@ -27,8 +27,8 @@ Doodle.MP = (function () {
     if (!url) { alert("Multiplayer needs the online build."); return; }
     if (ws && (ws.readyState === 0 || ws.readyState === 1)) { onOpen && onOpen(); return; }
     ws = new WebSocket(url);
-    ws.onopen = function () { onOpen && onOpen(); };
-    ws.onclose = function () { };
+    ws.onopen = function () { onOpen && onOpen(); if (pingTimer) clearInterval(pingTimer); pingTimer = setInterval(function () { send({ type: "ping" }); }, 25000); }; // keepalive vs idle proxy timeouts
+    ws.onclose = function () { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } };
     ws.onerror = function () { setMsg("connection error"); };
     ws.onmessage = function (e) {
       var m; try { m = JSON.parse(e.data); } catch (x) { return; }
