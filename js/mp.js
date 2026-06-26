@@ -38,12 +38,13 @@ Doodle.MP = (function () {
       else if (m.type === "error") { setMsg(m.error); }
       else if (m.type === "countdown") { renderCountdown(m.n); }
       else if (m.type === "start") { startRace(); }
-      else if (m.type === "players") { emit("players", m.players); }
+      else if (m.type === "players") { if (Doodle.MP.active) renderRail(m.players); emit("players", m.players); }
+      else if (m.type === "end") { renderStandings(m); }
     };
   }
 
   function startRace() {
-    // phase 2 will render opponents; for now close the lobby and start the game with the MP context set
+    iDied = false; raceOver = false; lastSent = 0; clearRace();
     Doodle.MP.active = true;
     Doodle.MP.myCharacter = (me() && me().character) || null;
     Doodle.MP.roomSnapshot = room;
@@ -61,6 +62,57 @@ Doodle.MP = (function () {
       } catch (e) {}
     }
     try { g.state.start("Game"); } catch (e) {}
+  }
+
+  // ---- in-race HUD: a vertical "climb rail" of every character + final standings ----
+  var rail = null, lastSent = 0, iDied = false, raceOver = false;
+  function ensureRail() {
+    if (rail) return;
+    rail = el("div", "position:fixed;top:9%;right:6px;height:82%;width:46px;z-index:99990;pointer-events:none;");
+    document.body.appendChild(rail);
+  }
+  function clearRace() { if (rail) { try { document.body.removeChild(rail); } catch (e) {} rail = null; } }
+  // place every player on the rail by score (leader on top); alive = jumping, dead = greyed; mine = outlined
+  function renderRail(players) {
+    ensureRail(); if (!rail) return;
+    while (rail.firstChild) rail.removeChild(rail.firstChild);
+    var maxS = 1; players.forEach(function (p) { if (p.score > maxS) maxS = p.score; });
+    players.forEach(function (p) {
+      var frac = Math.max(0, Math.min(1, p.score / maxS));
+      var icon = el("div", "position:absolute;left:0;width:44px;height:42px;bottom:" + (frac * 90) + "%;transition:bottom .15s linear;" +
+        "background:url('static/images/PlayerSheets/" + (p.character || "default") + ".png') no-repeat 0 0;background-size:176px auto;" +
+        (p.alive ? "animation:djjump .55s steps(4) infinite;" : "opacity:.4;filter:grayscale(1);") +
+        (p.id === myId ? "outline:2px solid #fff;border-radius:7px;" : ""));
+      rail.appendChild(icon);
+    });
+  }
+  // called from the game's update() ~each frame: throttle + broadcast my score/alive
+  function gameTick(state) {
+    if (iDied || raceOver) return;
+    ensureRail();
+    var now = Date.now(); if (now - lastSent < 140) return; lastSent = now;
+    var sc = Math.round((state && state.score) || 0);
+    send({ type: "state", score: sc, height: sc, alive: !(state && state.player && state.player.alive === false) });
+  }
+  // called from the game's gameOver(): report my fall once
+  function gameOver(state) {
+    if (raceOver || iDied) return; iDied = true;
+    var sc = Math.round((state && state.score) || 0);
+    send({ type: "state", score: sc, height: sc, alive: false });
+  }
+  function renderStandings(data) {
+    raceOver = true; clearRace(); openOverlay(); clearCard();
+    card.appendChild(el("div", "font:800 30px system-ui;margin-bottom:2px;", "results"));
+    card.appendChild(el("div", "font:600 14px system-ui;opacity:.7;margin-bottom:16px;", "mode: " + (data.mode || "")));
+    (data.standings || []).forEach(function (p, i) {
+      var row = el("div", "display:flex;align-items:center;justify-content:center;gap:10px;font:700 18px system-ui;margin:7px 0;" + (p.id === myId ? "color:#ffd9a8;" : ""));
+      row.appendChild(el("span", "width:30px;text-align:right;font-size:20px;", ["🥇", "🥈", "🥉"][i] || (i + 1 + ".")));
+      row.appendChild(el("span", "width:36px;height:34px;display:inline-block;background:url('static/images/PlayerSheets/" + (p.character || "default") + ".png') no-repeat 0 0;background-size:144px auto;"));
+      row.appendChild(el("span", "", p.name + "  ·  " + p.score));
+      card.appendChild(row);
+    });
+    card.appendChild(el("div", "height:16px;"));
+    card.appendChild(btn("back to menu", BTN, function () { close(); raceOver = false; iDied = false; try { if (Doodle.game) Doodle.game.state.start("Menu"); } catch (e) {} }));
   }
 
   // ---- UI ----------------------------------------------------------------
@@ -184,5 +236,7 @@ Doodle.MP = (function () {
     },
     close: close,
     send: send,
+    gameTick: gameTick, // game update() -> broadcast my score + climb-rail
+    gameOver: gameOver, // game gameOver() -> report my fall
   };
 })();
