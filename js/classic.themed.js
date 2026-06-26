@@ -664,8 +664,8 @@ Doodle.ScoresState = {
                 s.spawnText(s, 120, 199 + 81 * b, b + 1 + ". " + a[0], 60, "left", { x: 0, y: 0 }), s.spawnText(s, 620, 199 + 81 * b, a[1], 60, "right", { x: 1, y: 0 })
             }) : s.spawnText(s, 120, 199, "no scores yet", 48, "left", { x: 0, y: 0 });
             else if (Doodle.API_URL) s.spawnText(s, 120, 199, "loading...", 48, "left", { x: 0, y: 0 }), Doodle.fetchTopScores(function(rows) {
-                s.dataTest = rows || [], s.scrollMenu2 && s.scrollMenu2.visible && s.setLoad("global")
-            }, Doodle.getTheme());
+                s.dataTest = (rows || []).map(function(r) { return [r.name, r.score] }), s.scrollMenu2 && s.scrollMenu2.visible && s.setLoad("global")
+            });
             else s.spawnText(s, 120, 199, "global scores offline", 48, "left", { x: 0, y: 0 })
         }(this))
     }
