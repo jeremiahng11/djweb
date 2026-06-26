@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Leaderboard API for the Doodle Jump game (Fastify + Drizzle + Postgres).",
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
@@ -15,10 +17,12 @@
     "@fastify/rate-limit": "^10.2.1",
     "drizzle-orm": "^0.36.4",
     "fastify": "^5.2.0",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
+    "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.28.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

@@ -4,6 +4,7 @@ import rateLimit from "@fastify/rate-limit";
 import { ensureSchema } from "./db.js";
 import { scoreRoutes } from "./routes/scores.js";
 import { userRoutes } from "./routes/users.js";
+import { setupWebSocket } from "./ws.js";
 
 const app = Fastify({ logger: true });
 
@@ -25,7 +26,8 @@ const port = Number(process.env.PORT) || 3001;
 try {
   await ensureSchema();
   await app.listen({ port, host: "0.0.0.0" });
-  app.log.info(`Leaderboard API listening on :${port}`);
+  setupWebSocket(app.server, basePath); // multiplayer rooms at <basePath>/ws
+  app.log.info(`Leaderboard API + multiplayer WS listening on :${port}`);
 } catch (err) {
   app.log.error(err);
   process.exit(1);
