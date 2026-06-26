@@ -45,10 +45,22 @@ Doodle.MP = (function () {
   function startRace() {
     // phase 2 will render opponents; for now close the lobby and start the game with the MP context set
     Doodle.MP.active = true;
+    Doodle.MP.myCharacter = (me() && me().character) || null;
     Doodle.MP.roomSnapshot = room;
     close();
     emit("start", room);
-    try { if (Doodle.game) Doodle.game.state.start("Game"); } catch (e) {}
+    var g = Doodle.game; if (!g) return;
+    var c = Doodle.MP.myCharacter;
+    // make sure the chosen character's player sheet is loaded before the doodler is built
+    if (c && c !== "default" && !(Doodle._sheetOK && Doodle._sheetOK(g, "pl_" + c, 1))) {
+      try {
+        g.load.spritesheet("pl_" + c, "static/images/PlayerSheets/" + c + ".png", 124, 120, 4);
+        g.load.onLoadComplete.addOnce(function () { try { g.state.start("Game"); } catch (e) {} });
+        g.load.start();
+        return;
+      } catch (e) {}
+    }
+    try { g.state.start("Game"); } catch (e) {}
   }
 
   // ---- UI ----------------------------------------------------------------
@@ -60,6 +72,9 @@ Doodle.MP = (function () {
 
   function openOverlay() {
     if (ov) return;
+    if (!document.getElementById("mp_kf")) { // jump animation: cycle the 4 player-sheet frames
+      var s = el("style"); s.id = "mp_kf"; s.textContent = "@keyframes djjump{from{background-position-x:0}to{background-position-x:-216px}}"; document.head.appendChild(s);
+    }
     ov = el("div", "position:fixed;inset:0;z-index:99999;background:#404a59;color:#fff;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;overflow:auto;");
     card = el("div", "width:min(460px,92vw);text-align:center;padding:18px;");
     ov.appendChild(card); document.body.appendChild(ov);
@@ -129,7 +144,8 @@ Doodle.MP = (function () {
       var tile = el("div", "width:64px;padding:6px 4px;border-radius:10px;cursor:" + (isTaken ? "not-allowed" : "pointer") +
         ";background:" + (isMine ? "#fff" : "rgba(255,255,255,.12)") + ";color:" + (isMine ? "#404a59" : "#fff") +
         ";opacity:" + (isTaken ? ".3" : "1") + ";font:600 11px system-ui;");
-      var pic = el("div", "width:54px;height:52px;margin:0 auto 3px;background:url('static/images/PlayerSheets/" + ch + ".png') no-repeat 0 0;background-size:54px auto;");
+      // sheet is 4 frames wide (496x120) -> size to 4x the tile so frame 0 fills it; the selected one animates (jumps)
+      var pic = el("div", "width:54px;height:52px;margin:0 auto 3px;background:url('static/images/PlayerSheets/" + ch + ".png') no-repeat 0 0;background-size:216px auto;" + (isMine ? "animation:djjump .6s steps(4) infinite;" : ""));
       tile.appendChild(pic); tile.appendChild(el("div", "", ch));
       if (!isTaken) tile.onclick = function () { send({ type: "pick", character: ch }); };
       grid.appendChild(tile);
@@ -138,7 +154,13 @@ Doodle.MP = (function () {
     // ready + start
     var meP = me();
     card.appendChild(btn(meP && meP.ready ? "ready ✓ (tap to unready)" : "ready up", BTN, function () { send({ type: "ready", ready: !(meP && meP.ready) }); }));
-    if (isHost()) card.appendChild(btn("start game", BTN, function () { send({ type: "start" }); }));
+    // host's start unlocks only when there are >= 2 players and everyone has a character + is ready
+    if (isHost()) {
+      if (room.players.length >= 2 && room.players.every(function (p) { return p.character && p.ready; }))
+        card.appendChild(btn("start game", BTN, function () { send({ type: "start" }); }));
+      else
+        card.appendChild(el("div", "font:600 13px system-ui;opacity:.6;margin-top:8px;", "start unlocks once everyone has a character and is ready"));
+    }
     card.appendChild(el("div", "height:6px;"));
     card.appendChild(btn("leave", BTN2, function () { send({ type: "leave" }); room = null; renderHome(); }));
     card.appendChild(el("div", "font:600 13px system-ui;opacity:.7;margin-top:10px;", "share code " + room.code + " · mode: " + room.mode));
@@ -153,6 +175,7 @@ Doodle.MP = (function () {
 
   return {
     active: false,
+    myCharacter: null,
     roomSnapshot: null,
     open: function () {
       // show "connecting..." on the menu button until the socket opens, then reveal the lobby

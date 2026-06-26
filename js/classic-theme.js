@@ -75,6 +75,13 @@ Doodle._imgOK = function (game, key) {
 // ---- texture keys ----
 Doodle.playerKey = function () {
   try {
+    // multiplayer: your chosen character overrides the theme's doodler (its sheet is loaded at race start)
+    if (Doodle.MP && Doodle.MP.active && Doodle.MP.myCharacter) {
+      var mc = Doodle.MP.myCharacter;
+      if (mc === "default") return "player0";
+      var mk = "pl_" + mc;
+      if (Doodle.game && Doodle._sheetOK(Doodle.game, mk, 1)) return mk;
+    }
     var t = Doodle.getTheme();
     if (t === "default") return "player0";
     var suit = Doodle.getSuit(t);
