@@ -199,7 +199,7 @@ Doodle.GameState = {
         }, this), this.menuButton.events.onInputDown.add(function() {
             this.menuButton.loadTexture("atlas", "menu_02")
         }, this), this.panel = this.add.sprite(0, -23, "atlas", "top"), this.panel.fixedToCamera = !0, this.panel.alpha = .55, this.panel.width = 640, this.panel.height = 92 + (Doodle.safeTop || 0), Doodle.applyTopBar(this);
-        this.coinsCountLabel = this.add.bitmapText(15, 16 + (Doodle.safeTop || 0), "DoodleFont", "0", 56), this.coinsCountLabel.fixedToCamera = !0, this.coinsCountLabel.fontWeight = "bold", this.background = this.add.sprite(0, 0, "atlas2", "background"), this.background.fixedToCamera = !0, this.game.world.sendToBack(this.background), Doodle._applyBg(this), this.background.width = this.game.width, this.background.height = this.game.height, Doodle.startComets(this), Doodle.startPlanets(this), this.precedingPlatform = {
+        this.coinsCountLabel = this.add.bitmapText(15, 16 + (Doodle.safeTop || 0), "DoodleFont", "0", 56), this.coinsCountLabel.fixedToCamera = !0, this.coinsCountLabel.fontWeight = "bold", this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, "atlas2", "background"), this.background.fixedToCamera = !0, this.game.world.sendToBack(this.background), Doodle._applyBg(this), this.background.width = this.game.width, this.background.height = this.game.height, Doodle.startComets(this), Doodle.startPlanets(this), this.precedingPlatform = {
             x: this.game.world.centerX,
             y: this.game.world.height - 30,
             hasBonusObject: -1
