@@ -557,7 +557,7 @@ Doodle.PreloadState = {
 var Doodle = Doodle || {};
 Doodle.ScoresState = {
     init: function() {
-        this.localTopScores = JSON.parse(localStorage.getItem("DJ_localTopScores")) || [], this.localTopScores.length > 10 && (this.localTopScores.length = 10), this.followScroll = !1, this.startTouchY = 0, this.scrollLimit = -318, this.scrollLimit2 = -230
+        this.dataTest = null, this.localTopScores = JSON.parse(localStorage.getItem("DJ_localTopScores")) || [], this.localTopScores.length > 10 && (this.localTopScores.length = 10), this.followScroll = !1, this.startTouchY = 0, this.scrollLimit = -318, this.scrollLimit2 = -230
     },
     create: function() {
         function a(a) {
