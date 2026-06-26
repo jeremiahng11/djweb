@@ -113,6 +113,35 @@ export function startCountdown(room: Room): void {
   }, 1000);
 }
 
+export function rankPlayers(room: Room) {
+  // alive players first, then by score (height climbed) descending
+  return room.players
+    .slice()
+    .sort((a, b) => (Number(b.alive) - Number(a.alive)) || (b.score - a.score))
+    .map((p) => ({ id: p.id, name: p.name, character: p.character, score: p.score, height: p.height, alive: p.alive }));
+}
+
+export function finishRace(room: Room): void {
+  if (room.status === "done") return;
+  room.status = "done";
+  broadcast(room, { type: "end", mode: room.mode, standings: rankPlayers(room) });
+}
+
+// Apply the room's mode end-condition after a state update; returns true if the race just ended.
+export function checkEnd(room: Room): boolean {
+  if (room.status !== "playing") return false;
+  const aliveCount = room.players.filter((p) => p.alive).length;
+  let ended = false;
+  switch (room.mode) {
+    case "lastAlive": ended = room.players.length >= 2 ? aliveCount <= 1 : aliveCount === 0; break;
+    case "firstFall": ended = room.players.some((p) => !p.alive); break;
+    case "targetHeight": ended = room.players.some((p) => p.score >= room.targetHeight); break;
+    case "highScore": ended = aliveCount === 0; break;
+  }
+  if (ended) finishRace(room);
+  return ended;
+}
+
 export function leaveRoom(room: Room, player: Player): void {
   room.players = room.players.filter((p) => p !== player);
   if (room.players.length === 0) {
@@ -121,5 +150,6 @@ export function leaveRoom(room: Room, player: Player): void {
     return;
   }
   if (room.hostId === player.id) room.hostId = room.players[0]!.id;
+  if (room.status === "playing" && room.players.length <= 1) { finishRace(room); return; } // last one standing wins
   broadcastRoom(room);
 }

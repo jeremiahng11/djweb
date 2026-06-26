@@ -71,11 +71,12 @@ export function setupWebSocket(server: Server, basePath = ""): void {
           player.height = Number(msg.height) || 0;
           player.score = Number(msg.score) || 0;
           if (msg.alive === false) player.alive = false;
-          // phase 2 will add mode end-conditions; for now relay everyone's live state
+          // relay everyone's live state (for the opponent HUD), then apply the mode's end-condition
           R.broadcast(room, {
             type: "players",
             players: room.players.map((p) => ({ id: p.id, name: p.name, character: p.character, height: p.height, score: p.score, alive: p.alive })),
           });
+          R.checkEnd(room); // may broadcast { type: "end", standings } and flip status to "done"
           break;
         }
         case "leave": {
