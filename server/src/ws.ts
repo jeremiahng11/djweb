@@ -11,7 +11,7 @@ export function setupWebSocket(server: Server, basePath = ""): void {
     const player: R.Player = {
       id: R.newPlayerId(),
       name: "player", character: null, ready: false,
-      height: 0, score: 0, alive: true, finished: false,
+      height: 0, score: 0, x: 0, alive: true, finished: false,
       send: (msg) => { try { socket.send(JSON.stringify(msg)); } catch { /* dead socket */ } },
     };
     let room: R.Room | undefined;
@@ -70,11 +70,12 @@ export function setupWebSocket(server: Server, basePath = ""): void {
           if (!room || room.status !== "playing") break;
           player.height = Number(msg.height) || 0;
           player.score = Number(msg.score) || 0;
+          player.x = Number(msg.x) || 0;
           if (msg.alive === false) player.alive = false;
-          // relay everyone's live state (for the opponent HUD), then apply the mode's end-condition
+          // relay everyone's live state (for the opponent ghosts + HUD), then apply the mode's end-condition
           R.broadcast(room, {
             type: "players",
-            players: room.players.map((p) => ({ id: p.id, name: p.name, character: p.character, height: p.height, score: p.score, alive: p.alive })),
+            players: room.players.map((p) => ({ id: p.id, name: p.name, character: p.character, height: p.height, score: p.score, x: p.x, alive: p.alive })),
           });
           R.checkEnd(room); // may broadcast { type: "end", standings } and flip status to "done"
           break;

@@ -41,6 +41,22 @@ Doodle.getTheme = function () {
 };
 Doodle.setTheme = function (t) { localStorage.setItem("DJ_theme", t); };
 
+// Seeded PRNG (mulberry32) so a multiplayer race builds the SAME map for everyone.
+// Doodle.rand() is used by the level generator: seeded while a MP race is active, plain Math.random otherwise.
+Doodle._rng = null;
+Doodle.seedLevel = function (seed) {
+  var a = (seed >>> 0) || 1;
+  Doodle._rng = function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+};
+Doodle.rand = function () {
+  return (Doodle._rng && Doodle.MP && Doodle.MP.active) ? Doodle._rng() : Math.random();
+};
+
 // Selected suit for a theme ("" = base doodler).
 Doodle.getSuit = function (t) {
   t = t || Doodle.getTheme();

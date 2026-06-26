@@ -11,6 +11,7 @@ export interface Player {
   ready: boolean;
   height: number;
   score: number;
+  x: number; // horizontal position on the shared board (for opponent ghosts)
   alive: boolean;
   finished: boolean; // reached target / fell — i.e. done racing
   send(msg: unknown): void;
@@ -23,6 +24,7 @@ export interface Room {
   hostId: string;
   players: Player[];
   status: Status;
+  seed: number; // shared RNG seed so every client builds the identical map
   timer?: ReturnType<typeof setInterval>;
 }
 
@@ -62,7 +64,7 @@ export function broadcastRoom(room: Room): void {
 }
 
 export function createRoom(player: Player, mode: Mode, targetHeight: number): Room {
-  const room: Room = { code: genCode(), mode, targetHeight, hostId: player.id, players: [player], status: "lobby" };
+  const room: Room = { code: genCode(), mode, targetHeight, hostId: player.id, players: [player], status: "lobby", seed: 0 };
   rooms.set(room.code, room);
   return room;
 }
@@ -99,6 +101,7 @@ export function canStart(room: Room): string | null {
 
 export function startCountdown(room: Room): void {
   room.status = "countdown";
+  room.seed = Math.floor(Math.random() * 0x7fffffff) || 1; // shared map seed for this race
   broadcastRoom(room);
   let n = 3;
   broadcast(room, { type: "countdown", n });
@@ -108,8 +111,8 @@ export function startCountdown(room: Room): void {
     clearInterval(room.timer);
     room.timer = undefined;
     room.status = "playing";
-    for (const p of room.players) { p.alive = true; p.finished = false; p.height = 0; p.score = 0; }
-    broadcast(room, { type: "start" });
+    for (const p of room.players) { p.alive = true; p.finished = false; p.height = 0; p.score = 0; p.x = 0; }
+    broadcast(room, { type: "start", seed: room.seed }); // everyone builds the same level from this seed
   }, 1000);
 }
 

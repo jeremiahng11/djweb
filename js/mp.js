@@ -37,15 +37,16 @@ Doodle.MP = (function () {
       else if (m.type === "room") { room = m.room; if (room.status === "lobby") { raceOver = false; iDied = false; clearGhosts(); clearRace(); } render(); }
       else if (m.type === "error") { setMsg(m.error); }
       else if (m.type === "countdown") { renderCountdown(m.n); }
-      else if (m.type === "start") { startRace(); }
+      else if (m.type === "start") { startRace(m.seed); }
       else if (m.type === "players") { lastPlayers = m.players || []; if (Doodle.MP.active) renderRail(lastPlayers); emit("players", lastPlayers); }
       else if (m.type === "end") { renderStandings(m); }
     };
   }
 
-  function startRace() {
+  function startRace(seed) {
     iDied = false; raceOver = false; lastSent = 0; clearRace(); clearGhosts();
     Doodle.MP.active = true;
+    if (seed && Doodle.seedLevel) Doodle.seedLevel(seed); // everyone builds the identical map from this seed
     Doodle.MP.myCharacter = (me() && me().character) || null;
     Doodle.MP.roomSnapshot = room;
     lastPlayers = (room && room.players) ? room.players.slice() : [];
@@ -92,11 +93,12 @@ Doodle.MP = (function () {
           try { g.djTag = state.add.bitmapText(0, 0, "DoodleFont", String(p.name || ""), 22); g.djTag.anchor.setTo(.5); g.djTag.alpha = .75; } catch (e) {}
           ghosts[p.id] = g;
         }
-        var lane = W * (0.22 + 0.56 * (opps.length > 1 ? i / (opps.length - 1) : 0.5));
+        // shared map: place the ghost at the opponent's REAL x (falls back to a lane if x is missing)
+        var gx = (typeof p.x === "number" && p.x) ? p.x : W * (0.22 + 0.56 * (opps.length > 1 ? i / (opps.length - 1) : 0.5));
         var y = state.player.y - (p.score - state.score) * 2;       // 2px per score point
         var on = y > 24 && y < H - 24;
         g.visible = on; if (g.djTag) g.djTag.visible = on;
-        if (on) { g.x = lane; g.y = y; g.alpha = p.alive ? .55 : .28; if (g.djTag) { g.djTag.x = lane; g.djTag.y = y - 50; } }
+        if (on) { g.x = gx; g.y = y; g.alpha = p.alive ? .55 : .28; if (g.djTag) { g.djTag.x = gx; g.djTag.y = y - 50; } }
       });
       for (var id in ghosts) if (!present[id]) { try { ghosts[id].djTag && ghosts[id].djTag.destroy(); ghosts[id].destroy(); } catch (e) {} delete ghosts[id]; }
     } catch (e) {}
@@ -129,7 +131,8 @@ Doodle.MP = (function () {
     if (iDied) return;
     var now = Date.now(); if (now - lastSent < 140) return; lastSent = now;
     var sc = Math.round((state && state.score) || 0);
-    send({ type: "state", score: sc, height: sc, alive: !(state && state.player && state.player.alive === false) });
+    var px = Math.round((state && state.player && state.player.x) || 0);
+    send({ type: "state", score: sc, height: sc, x: px, alive: !(state && state.player && state.player.alive === false) });
   }
   // called from the game's gameOver(): report my fall once
   function gameOver(state) {
