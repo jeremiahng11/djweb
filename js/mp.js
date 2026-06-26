@@ -64,7 +64,7 @@ Doodle.MP = (function () {
     card = el("div", "width:min(460px,92vw);text-align:center;padding:18px;");
     ov.appendChild(card); document.body.appendChild(ov);
   }
-  function close() { if (ov) { document.body.removeChild(ov); ov = null; card = null; msgEl = null; } }
+  function close() { if (ov) { document.body.removeChild(ov); ov = null; card = null; msgEl = null; } if (Doodle.MP_onClose) Doodle.MP_onClose(); }
   function clearCard() { while (card.firstChild) card.removeChild(card.firstChild); }
   function header(t) { card.appendChild(el("div", "font:800 30px system-ui;letter-spacing:1px;margin-bottom:6px;", "doodle jump")); card.appendChild(el("div", "font:600 18px system-ui;opacity:.85;margin-bottom:18px;", t)); }
   function addMsg() { msgEl = el("div", "min-height:20px;font:600 14px system-ui;color:#ffd9a8;margin-top:12px;"); card.appendChild(msgEl); }
@@ -154,7 +154,11 @@ Doodle.MP = (function () {
   return {
     active: false,
     roomSnapshot: null,
-    open: function () { openOverlay(); renderHome(); },
+    open: function () {
+      // show "connecting..." on the menu button until the socket opens, then reveal the lobby
+      var done = false, to = setTimeout(function () { if (!done) { if (Doodle.MP_onClose) Doodle.MP_onClose(); alert("Could not reach the multiplayer server."); } }, 6000);
+      connect(function () { done = true; clearTimeout(to); openOverlay(); renderHome(); });
+    },
     close: close,
     send: send,
   };

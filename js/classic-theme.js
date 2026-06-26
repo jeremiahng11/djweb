@@ -174,6 +174,11 @@ Doodle.loadThemeAssets = function (game) {
       game.load.image("menutorn", "static/images/themeslider/menu_tornpaper.png");
       game.load.image("mainmenu", "static/images/Backgrounds/menu_tiled.png");
       game.load.image("linedbg", "static/images/Backgrounds/linedbg.png"); // plain tall lined paper to fill sub-screens (scores/options) full-height
+      if (Doodle.API_URL) { // multiplayer button states (online only)
+        game.load.image("mpbtn", "static/images/Buttons/multiplayer@2x.png");
+        game.load.image("mpbtn_on", "static/images/Buttons/multiplayer-on@2x.png");
+        game.load.image("mpbtn_conn", "static/images/Buttons/multiplayer-connecting@2x.png");
+      }
       Doodle.THEMES.forEach(function (_tm) {
         var _pn = ({ "default": "original", snow: "winter", doodlestein: "halloween" })[_tm] || _tm;
         game.load.image("themestrip_" + _tm, "static/images/themeslider/theme_" + _pn + "_X.png");
