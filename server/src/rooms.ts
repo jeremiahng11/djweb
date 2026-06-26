@@ -142,6 +142,14 @@ export function checkEnd(room: Room): boolean {
   return ended;
 }
 
+// Rematch: put a finished room back in the lobby, keeping players + their characters.
+export function resetToLobby(room: Room): void {
+  if (room.timer) { clearInterval(room.timer); room.timer = undefined; }
+  room.status = "lobby";
+  for (const p of room.players) { p.ready = false; p.alive = true; p.finished = false; p.score = 0; p.height = 0; }
+  broadcastRoom(room);
+}
+
 export function leaveRoom(room: Room, player: Player): void {
   room.players = room.players.filter((p) => p !== player);
   if (room.players.length === 0) {

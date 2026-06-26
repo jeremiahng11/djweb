@@ -79,6 +79,11 @@ export function setupWebSocket(server: Server, basePath = ""): void {
           R.checkEnd(room); // may broadcast { type: "end", standings } and flip status to "done"
           break;
         }
+        case "rematch": {
+          if (!room || room.hostId !== player.id) break;
+          R.resetToLobby(room); // back to lobby, keep players + characters
+          break;
+        }
         case "leave": {
           if (room) { R.leaveRoom(room, player); room = undefined; }
           break;
