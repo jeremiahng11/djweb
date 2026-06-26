@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { desc, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db, scores } from "../db.js";
 
 const MAX_SCORE = 5_000_000; // sanity cap (basic anti-cheat; real validation can come later)
@@ -47,11 +47,13 @@ export async function scoreRoutes(app: FastifyInstance): Promise<void> {
     },
     async (req) => {
       const { limit = 10, theme } = req.query as { limit?: number; theme?: string };
+      // best score per player (one row per name), highest first
       const rows = await db
-        .select({ name: scores.name, score: scores.score, theme: scores.theme, createdAt: scores.createdAt })
+        .select({ name: scores.name, score: sql<number>`max(${scores.score})`.mapWith(Number) })
         .from(scores)
         .where(theme ? eq(scores.theme, theme) : undefined)
-        .orderBy(desc(scores.score))
+        .groupBy(scores.name)
+        .orderBy(sql`max(${scores.score}) desc`)
         .limit(limit);
       return { scores: rows };
     }

@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import { ensureSchema } from "./db.js";
 import { scoreRoutes } from "./routes/scores.js";
+import { userRoutes } from "./routes/users.js";
 
 const app = Fastify({ logger: true });
 
@@ -18,6 +19,7 @@ const basePath = process.env.BASE_PATH || "";
 app.get("/health", async () => ({ ok: true })); // unprefixed: container/internal healthcheck
 if (basePath) app.get(basePath + "/health", async () => ({ ok: true })); // public healthcheck under the base path
 await app.register(scoreRoutes, { prefix: basePath });
+await app.register(userRoutes, { prefix: basePath });
 
 const port = Number(process.env.PORT) || 3001;
 try {

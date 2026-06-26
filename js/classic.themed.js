@@ -190,7 +190,7 @@ Doodle.GameState = {
             7 == this.playAgainButton.frame && (this.adTriggered ? (this.state.start("Game"), this.playAgainButton.loadTexture("atlas", "playAgain_01"), this.writeScore()) : (this.adTriggered = !0))
         }, this), this.playAgainButton.events.onInputDown.add(function() {
             this.playAgainButton.loadTexture("atlas", "playAgain_02")
-        }, this), this.overlay = this.add.bitmapData(300, 50), this.inputNamePole = new Phaser.Sprite(this.game, 330, 470, this.overlay), this.inputNamePole.inputEnabled = !0, this.inputNamePole.events.onInputUp.add(function() {
+        }, this), this.overlay = this.add.bitmapData(300, 50), this.inputNamePole = new Phaser.Sprite(this.game, 330, 470, this.overlay), this.inputNamePole.inputEnabled = !Doodle.API_URL, this.inputNamePole.events.onInputUp.add(function() {
             this.inputTextSchedule(), document.getElementById("highscore").focus(), document.getElementById("highscore").setSelectionRange(1e3, 1e3), this.inputNameListener = !0
         }, this), this.gameOverGroup.add(this.inputNamePole), this.menuButton.inputEnabled = !0, this.menuButton.events.onInputOut.add(function() {
             this.menuButton.loadTexture("atlas", "menu_01")

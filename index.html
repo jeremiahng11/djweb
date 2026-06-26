@@ -42,7 +42,12 @@
     <div id="safeprobe" style="position:fixed;top:0;left:0;width:0;height:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden;pointer-events:none;"></div>
     <div id="tapstart" style="position:fixed;inset:0;z-index:99998;background:#404a59;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
       <div style="font-size:38px;font-weight:800;letter-spacing:1px;">doodle jump</div>
-      <div style="font-size:22px;margin-top:10px;opacity:.95;animation:djpulse 1.2s ease-in-out infinite;">tap to play</div>
+      <div id="ts_tap" style="font-size:22px;margin-top:10px;opacity:.95;animation:djpulse 1.2s ease-in-out infinite;">tap to play</div>
+      <div id="ts_name" style="display:none;margin-top:14px;">
+        <input id="ts_input" type="text" maxlength="24" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="enter a name" style="font-size:20px;padding:10px 14px;border-radius:10px;border:none;background:#fff;color:#222;text-align:center;width:230px;outline:none;" />
+        <div id="ts_btn" style="margin-top:14px;display:inline-block;font-size:22px;font-weight:700;background:#fff;color:#404a59;padding:8px 30px;border-radius:22px;cursor:pointer;">play</div>
+      </div>
+      <div id="ts_who" style="display:none;font-size:14px;margin-top:16px;opacity:.85;">playing as <b id="ts_whoname"></b> &nbsp;·&nbsp; <span id="ts_change" style="text-decoration:underline;cursor:pointer;">change</span></div>
       <div style="font-size:14px;margin-top:22px;opacity:.75;line-height:1.6;">tilt your phone &nbsp;·&nbsp; or touch &amp; drag<br/>to move left / right</div>
       <style>@keyframes djpulse{0%,100%{opacity:.55}50%{opacity:1}}</style>
     </div>
@@ -72,24 +77,58 @@
         window.addEventListener("focus", arm);
         window.addEventListener("pageshow", arm);
       })();
-      // tap-to-start overlay: one clean gesture grants iOS motion permission + unlocks audio, then reveals the game
+      // Start overlay: first launch asks for a name (passwordless "account"); after that, tap to play.
+      // The name grants iOS motion permission + unlocks audio on the same gesture, and is your local + global score name.
       (function () {
         var ov = document.getElementById("tapstart"); if (!ov) return;
-        function go() {
+        var tap = document.getElementById("ts_tap"), nameBox = document.getElementById("ts_name"),
+            input = document.getElementById("ts_input"), btn = document.getElementById("ts_btn"),
+            who = document.getElementById("ts_who"), whoName = document.getElementById("ts_whoname"),
+            change = document.getElementById("ts_change"), entering = false;
+        function stored() { try { return (localStorage.getItem("DJ_Doodle_name") || "").trim(); } catch (e) { return ""; } }
+        function reveal() {
           if (window.__djReqTilt) window.__djReqTilt();
           try { var g = window.Doodle && window.Doodle.game; if (g && g.sound && g.sound.context && g.sound.context.resume) g.sound.context.resume(); } catch (e) {}
           ov.style.display = "none";
         }
-        ov.addEventListener("click", go);
-        ov.addEventListener("touchend", function (e) { e.preventDefault(); go(); }, { passive: false });
+        function saveName(n) {
+          n = (n || "").trim().slice(0, 24); if (!n) return false;
+          try { localStorage.setItem("DJ_Doodle_name", n); } catch (e) {}
+          // passwordless register/login; ignore failures (the name still works locally)
+          try { if (window.DJ_API_URL) fetch(window.DJ_API_URL + "/api/users/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ username: n }) }).catch(function () {}); } catch (e) {}
+          return true;
+        }
+        function showSignedIn() {
+          entering = false;
+          if (tap) tap.style.display = ""; if (nameBox) nameBox.style.display = "none";
+          if (who) who.style.display = ""; if (whoName) whoName.textContent = stored();
+          // ensure a returning player exists in the users table (idempotent, fire-and-forget)
+          try { if (window.DJ_API_URL && stored()) fetch(window.DJ_API_URL + "/api/users/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ username: stored() }) }).catch(function () {}); } catch (e) {}
+        }
+        function showNameEntry() {
+          entering = true;
+          if (tap) tap.style.display = "none"; if (who) who.style.display = "none"; if (nameBox) nameBox.style.display = "";
+          if (input) { input.value = stored(); setTimeout(function () { try { input.focus(); } catch (e) {} }, 60); }
+        }
+        function submitName() { if (saveName(input && input.value)) reveal(); else if (input) input.focus(); }
+        // tap anywhere to play — only when signed in and not mid-entry
+        function tapPlay(e) { if (!entering && stored()) { if (e && e.preventDefault) e.preventDefault(); reveal(); } }
+        ov.addEventListener("click", tapPlay);
+        ov.addEventListener("touchend", tapPlay, { passive: false });
+        function stop(e) { e.stopPropagation(); }
+        if (input) { input.addEventListener("click", stop); input.addEventListener("touchend", stop);
+          input.addEventListener("keydown", function (e) { if (e.key === "Enter") submitName(); }); }
+        if (btn) ["click", "touchend"].forEach(function (ev) { btn.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); submitName(); }); });
+        if (change) ["click", "touchend"].forEach(function (ev) { change.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); showNameEntry(); }); });
+        if (stored()) showSignedIn(); else showNameEntry();
       })();
     </script>
     <input id="highscore" type="text" />
     <!-- Leaderboard API base, same-origin under /djapi (the server app is routed to djweb.../djapi). "" = local-only. -->
     <script>window.DJ_API_URL = "https://djapi.jeremiah.sg";</script>
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=159"></script>
-    <script src="js/classic.themed.js?v=159"></script>
-    <script src="js/doodle.js?v=159"></script>
+    <script src="js/classic-theme.js?v=160"></script>
+    <script src="js/classic.themed.js?v=160"></script>
+    <script src="js/doodle.js?v=160"></script>
   </body>
 </html>
