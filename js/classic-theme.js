@@ -420,11 +420,12 @@ Doodle.propAnim = function (b) {
 // Spawned 2-4 times per game from loadLevel; activated via bonusActivate.
 Doodle.maybeRocket = function (gs, platform) {
   try {
-    if (Doodle.getTheme() !== "space" || !platform) return;
+    if (!platform || platform.hasBonusObject !== -1) return; // deterministic gate (same across clients)
+    var _roll = Doodle.rand();                         // consume the seeded value HERE so the shared-map stream stays in sync regardless of theme
+    if (Doodle.getTheme() !== "space") return;          // non-space: rolled, but no rocket here
     if (gs.score < 50) gs._rocketCount = 0;            // reset each new game
-    if (platform.hasBonusObject !== -1) return;
     if (gs._rocketCount >= 4) return;
-    if (Math.random() > 0.006) return;                 // rare
+    if (_roll > 0.006) return;                          // rare
     var th = Doodle.getTheme();
     if (!Doodle._imgOK(gs.game, "rocketpick_" + th)) return;
     var b = gs.bonusPool.getFirstExists(false);
