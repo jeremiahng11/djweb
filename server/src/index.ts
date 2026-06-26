@@ -12,8 +12,12 @@ await app.register(cors, {
 });
 await app.register(rateLimit, { max: 60, timeWindow: "1 minute" });
 
-app.get("/health", async () => ({ ok: true }));
-await app.register(scoreRoutes);
+// BASE_PATH lets the API live under a sub-path (e.g. "/djapi") when the proxy forwards the prefix
+// without stripping it. Leave unset when the API has its own domain (or the proxy strips the prefix).
+const basePath = process.env.BASE_PATH || "";
+app.get("/health", async () => ({ ok: true })); // unprefixed: container/internal healthcheck
+if (basePath) app.get(basePath + "/health", async () => ({ ok: true })); // public healthcheck under the base path
+await app.register(scoreRoutes, { prefix: basePath });
 
 const port = Number(process.env.PORT) || 3001;
 try {

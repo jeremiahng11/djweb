@@ -29,11 +29,21 @@ curl -XPOST localhost:3001/api/scores -H 'content-type: application/json' -d '{"
 curl localhost:3001/api/scores/top
 ```
 
-## Deploy on Coolify
+## Deploy on Coolify (same domain as the game — recommended)
+Serve the API under a path on the game's domain (e.g. `djweb.jeremiah.sg/djapi`) so it's same-origin (no CORS)
+and the game stays a separate, always-up static app.
+
 1. Create a **PostgreSQL** service. Copy its internal connection URL.
-2. New **Application** → point at this repo, **Base directory** `server`, build with the included `Dockerfile`.
-3. Env vars: `DATABASE_URL=<postgres internal url>`, `PORT=3001`, and `CORS_ORIGIN=<your game URL>`.
-4. Expose port **3001**. The table is created automatically on first boot.
+2. New **Application** → this repo, **Base directory** `server`, build with the included `Dockerfile`.
+3. Env: `DATABASE_URL=<postgres internal url>`, `PORT=3001`. Expose port **3001**.
+4. **Domains**: set the app's domain to `https://djweb.jeremiah.sg/djapi` (same host as the game, a `/djapi` path).
+5. Deploy, then test which way the proxy forwards the path:
+   - `curl https://djweb.jeremiah.sg/djapi/api/scores/top`
+   - Returns `{"scores":[...]}` → done (proxy strips the prefix; keep `BASE_PATH` unset).
+   - Returns 404 → the proxy keeps the prefix → set env **`BASE_PATH=/djapi`** and redeploy.
+6. In the game, `window.DJ_API_URL` is `/djapi` (relative, same-origin) — no further game change needed.
+
+The `scores` table is created automatically on first boot.
 
 ## Env vars
 - `DATABASE_URL` — Postgres connection string (required)
