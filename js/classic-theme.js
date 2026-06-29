@@ -157,8 +157,8 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("nose_default", "static/images/PlayerSheets/nose_default.png");
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
-    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png", 256, 192, 9); // doodler-in-UFO ride (space, clean 3x3 grid)
-    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png"); // empty saucer pickup (space)
+    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png?v=184", 256, 192, 9); // doodler-in-UFO ride (space, clean 3x3 grid). ?v busts stale image cache
+    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=184"); // empty saucer pickup (space). ?v busts stale image cache
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
       var d = Doodle.THEME_DATA[th];
