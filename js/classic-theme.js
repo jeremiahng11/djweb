@@ -286,16 +286,11 @@ Doodle.applyMenuBg = function (state) {
           if (state._themeLoadT) clearTimeout(state._themeLoadT);
           state._themeLoadT = setTimeout(function () {
             try {
-              var g = state.game;
-              Doodle.loadThemeAssets(g);
-              g.load.onLoadComplete.addOnce(function () {
-                try {
-                  if (state.player && state.player.loadTexture) { state.player.loadTexture(Doodle.playerKey()); state.player.frame = 0; }
-                  if (Doodle.applyMenuDecor) Doodle.applyMenuDecor(state);
-                  Doodle.setPageBgScene(Doodle.themeBottomColor()); // strip follows the newly-selected theme's scene
-                } catch (e2) {}
-              });
-              g.load.start();
+              // assets are ALL preloaded in Preload, so re-skin IN PLACE with NO runtime loader call.
+              // (Doodle.loadThemeAssets + g.load.start() at runtime stalls Phaser mid-state -> white screen.)
+              if (state.player && state.player.loadTexture) { state.player.loadTexture(Doodle.playerKey()); state.player.frame = 0; }
+              if (Doodle.applyMenuDecor) Doodle.applyMenuDecor(state);
+              Doodle.setPageBgScene(Doodle.themeBottomColor()); // strip follows the newly-selected theme's scene
             } catch (e1) {}
           }, 550);
         }
