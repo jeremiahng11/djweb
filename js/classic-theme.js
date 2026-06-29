@@ -158,7 +158,7 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
     game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png?v=186", 160, 120, 9); // doodler-in-UFO ride (space, 480x360 -> 160x120 x9). ?v busts stale image cache
-    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=186"); // empty saucer pickup (space). ?v busts stale image cache
+    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=187"); // empty saucer pickup (space). ?v busts stale image cache
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
       var d = Doodle.THEME_DATA[th];
@@ -477,7 +477,7 @@ Doodle.activateUfo = function (a, b, gs) {
     if (Doodle._sheetOK(g, flyKey, 9)) {                     // animated doodler-in-UFO
       a.loadTexture(flyKey); a.frame = 0;
       a.anchor.setTo(0.5, 0.46);
-      a.scale.setTo(0.68 * face, 0.68);                      // 160px frame -> ~108px in flight
+      a.scale.setTo(0.88 * face, 0.88);                      // 160px frame -> ~140px in flight (+30%)
       a.animations.add("uf", [0, 1, 2, 3, 4, 5, 6, 7, 8], 16, true); a.play("uf");
     } else if (Doodle._imgOK(g, pickKey)) {                  // flight sheet unavailable -> ride the empty saucer
       a.loadTexture(pickKey); a.frame = 0;
