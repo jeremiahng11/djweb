@@ -158,6 +158,7 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
     game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/UFO-Doodler.png", 448, 336, 9); // doodler-in-UFO ride (space)
+    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png"); // empty saucer pickup (space)
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
       var d = Doodle.THEME_DATA[th];
@@ -446,14 +447,14 @@ Doodle.maybeUfo = function (gs, platform) {
     if (gs.score < 50) gs._ufoCount = 0;                     // reset each new game
     if (gs._ufoCount >= 4) return;
     if (_roll > 0.006) return;                               // rare, same cadence as the rocket
-    if (!Doodle._sheetOK(gs.game, "ufofly_space", 9)) return;
+    if (!Doodle._sheetOK(gs.game, "ufofly_space", 9) || !Doodle._imgOK(gs.game, "ufopick_space")) return;
     var b = gs.bonusPool.getFirstExists(false);
     if (b) b.reset(platform.x, platform.top + 5, "bonus2", platform, gs.score);
     else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
     b.isUfo = true;
-    b.loadTexture("ufofly_space"); b.frame = 0;
-    b.anchor.setTo(0.5, 0.72); b.scale.setTo(0.3, 0.3);      // ~134x101 saucer resting on the platform
-    if (b.body) { b.body.setSize(360, 220, 44, 44); b.body.allowGravity = false; } // grab box over the saucer (texture space; scales with the sprite)
+    b.loadTexture("ufopick_space");                          // empty saucer (320x320) sitting on the platform
+    b.anchor.setTo(0.5, 0.82); b.scale.setTo(0.4, 0.4);      // ~128px, disc bottom resting on the platform
+    if (b.body) { b.body.setSize(280, 210, 20, 40); b.body.allowGravity = false; } // grab box over the saucer (texture space; scales with the sprite)
     platform.hasBonusObject = 9;
     gs._ufoCount = (gs._ufoCount || 0) + 1;
   } catch (e) { Doodle._show("maybeUfo: " + e.message); }

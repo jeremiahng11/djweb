@@ -1,7 +1,7 @@
 // Service worker: makes the online build an installable, offline-capable PWA.
 // NETWORK-FIRST for GET requests: when online you always get the latest (no stale-asset
 // problems after a deploy); falls back to cache only when offline. Bump CACHE on each release.
-var CACHE = "dj-v176";
+var CACHE = "dj-v177";
 
 self.addEventListener("install", function (e) { self.skipWaiting(); });
 
