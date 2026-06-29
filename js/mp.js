@@ -7,8 +7,9 @@ Doodle.MP = (function () {
   var ws = null, myId = null, room = null, ov = null, card = null, pingTimer = null;
   var listeners = {}; // event -> fn
 
-  // characters offered in the picker = the doodler roster (theme player sheets)
-  var CHARACTERS = (Doodle.ALL_THEMES || ["default", "space"]).slice();
+  // characters offered in the picker = the themed doodler sheets (exclude "default": it's the plain
+  // atlas doodler, not a real character skin, and selecting it crashes the race)
+  var CHARACTERS = (Doodle.ALL_THEMES || ["default", "space"]).filter(function (t) { return t !== "default"; });
 
   function wsUrl() {
     var base = (typeof window !== "undefined" && window.DJ_API_URL) || "";
@@ -93,12 +94,15 @@ Doodle.MP = (function () {
           try { g.djTag = state.add.bitmapText(0, 0, "DoodleFont", String(p.name || ""), 22); g.djTag.anchor.setTo(.5); g.djTag.alpha = .75; } catch (e) {}
           ghosts[p.id] = g;
         }
-        // shared map: place the ghost at the opponent's REAL x (falls back to a lane if x is missing)
-        var gx = (typeof p.x === "number" && p.x) ? p.x : W * (0.22 + 0.56 * (opps.length > 1 ? i / (opps.length - 1) : 0.5));
-        var y = state.player.y - (p.score - state.score) * 2;       // 2px per score point
+        // shared map: opponent's REAL x (lane fallback). Smooth score+x toward the latest ~10Hz
+        // snapshot every frame so the ghost glides instead of stepping between network updates.
+        var tx = (typeof p.x === "number" && p.x) ? p.x : W * (0.22 + 0.56 * (opps.length > 1 ? i / (opps.length - 1) : 0.5));
+        g.sScore = (g.sScore == null) ? p.score : g.sScore + (p.score - g.sScore) * 0.3;
+        g.sX = (g.sX == null) ? tx : g.sX + (tx - g.sX) * 0.3;
+        var y = state.player.y - (g.sScore - state.score) * 2;     // 2px per score point
         var on = y > 24 && y < H - 24;
         g.visible = on; if (g.djTag) g.djTag.visible = on;
-        if (on) { g.x = gx; g.y = y; g.alpha = p.alive ? .55 : .28; if (g.djTag) { g.djTag.x = gx; g.djTag.y = y - 50; } }
+        if (on) { g.x = g.sX; g.y = y; g.alpha = p.alive ? .55 : .28; if (g.djTag) { g.djTag.x = g.sX; g.djTag.y = y - 50; } }
       });
       for (var id in ghosts) if (!present[id]) { try { ghosts[id].djTag && ghosts[id].djTag.destroy(); ghosts[id].destroy(); } catch (e) {} delete ghosts[id]; }
     } catch (e) {}
@@ -129,7 +133,7 @@ Doodle.MP = (function () {
     ensureRail();
     positionGhosts(state); // each frame (keep spectating opponents after I die)
     if (iDied) return;
-    var now = Date.now(); if (now - lastSent < 140) return; lastSent = now;
+    var now = Date.now(); if (now - lastSent < 100) return; lastSent = now;
     var sc = Math.round((state && state.score) || 0);
     var px = Math.round((state && state.player && state.player.x) || 0);
     send({ type: "state", score: sc, height: sc, x: px, alive: !(state && state.player && state.player.alive === false) });
