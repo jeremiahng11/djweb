@@ -450,7 +450,7 @@ Doodle.maybeUfo = function (gs, platform) {
     if (!pickKey) return; // only the small pickup is needed to SHOW the saucer; the flight sheet is used at ride time (with fallback)
     if (gs.score < 50) gs._ufoCount = 0;                     // reset each new game
     if (gs._ufoCount >= 999) return;                         // TEST: cap lifted (normal = 4)
-    if (_roll > 0.15) return;                                // TEST: ~1-in-7 platforms (normal = 0.006). REVERT to 0.006 after testing
+    if (_roll > 0.5) return;                                 // TEST: ~1-in-2 platforms (normal = 0.006). REVERT to 0.006 after testing
     var b = gs.bonusPool.getFirstExists(false);
     if (b) b.reset(platform.x, platform.top + 5, "bonus2", platform, gs.score);
     else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
