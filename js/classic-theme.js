@@ -157,7 +157,7 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("nose_default", "static/images/PlayerSheets/nose_default.png");
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
-    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/UFO-Doodler.png", 448, 336, 9); // doodler-in-UFO ride (space)
+    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png", 400, 298, 9); // doodler-in-UFO ride (space, 3x3 grid)
     game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png"); // empty saucer pickup (space)
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
@@ -456,7 +456,7 @@ Doodle.maybeUfo = function (gs, platform) {
     else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
     b.isUfo = true; b._ufoFly = flyKey;                      // remember which flight sheet to ride
     b.loadTexture(pickKey);                                  // empty saucer sitting on the platform
-    b.anchor.setTo(0.5, 0.82); b.scale.setTo(0.4, 0.4);      // ~128px, disc bottom resting on the platform
+    b.anchor.setTo(0.5, 0.82); b.scale.setTo(0.28, 0.28);    // ~90px saucer, disc bottom resting on the platform (smaller)
     if (b.body) { b.body.setSize(280, 210, 20, 40); b.body.allowGravity = false; } // grab box over the saucer (texture space; scales with the sprite)
     platform.hasBonusObject = 9;
     gs._ufoCount = (gs._ufoCount || 0) + 1;
@@ -476,7 +476,7 @@ Doodle.activateUfo = function (a, b, gs) {
     if (Doodle._sheetOK(g, flyKey, 9)) {
       a.loadTexture(flyKey); a.frame = 0;
       a.anchor.setTo(0.5, 0.46);
-      a.scale.setTo(0.384 * face, 0.384);                    // ~172x129 in flight
+      a.scale.setTo(0.27 * face, 0.27);                      // ~108px in flight (smaller)
       a.animations.add("uf", [0, 1, 2, 3, 4, 5, 6, 7, 8], 16, true); a.play("uf");
     }
     if (a.body) { a.body.velocity.x = 0; a.body.velocity.y = -1400; a.body.gravity.y = -2400; } // strong boost off the pad
