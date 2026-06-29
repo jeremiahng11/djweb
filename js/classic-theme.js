@@ -443,16 +443,19 @@ Doodle.maybeUfo = function (gs, platform) {
   try {
     if (!platform || platform.hasBonusObject !== -1) return; // deterministic gate (same across clients)
     var _roll = Doodle.rand();                               // consume HERE so the shared-map RNG stream stays in sync regardless of theme
-    if (Doodle.getTheme() !== "space") return;
+    // theme-aware: use THIS theme's UFO art when present, else fall back to the space saucer
+    var _t = Doodle.getTheme();
+    var pickKey = Doodle._imgOK(gs.game, "ufopick_" + _t) ? "ufopick_" + _t : (Doodle._imgOK(gs.game, "ufopick_space") ? "ufopick_space" : null);
+    var flyKey = Doodle._sheetOK(gs.game, "ufofly_" + _t, 9) ? "ufofly_" + _t : (Doodle._sheetOK(gs.game, "ufofly_space", 9) ? "ufofly_space" : null);
+    if (!pickKey || !flyKey) return;
     if (gs.score < 50) gs._ufoCount = 0;                     // reset each new game
     if (gs._ufoCount >= 999) return;                         // TEST: cap lifted (normal = 4)
     if (_roll > 0.15) return;                                // TEST: ~1-in-7 platforms (normal = 0.006). REVERT to 0.006 after testing
-    if (!Doodle._sheetOK(gs.game, "ufofly_space", 9) || !Doodle._imgOK(gs.game, "ufopick_space")) return;
     var b = gs.bonusPool.getFirstExists(false);
     if (b) b.reset(platform.x, platform.top + 5, "bonus2", platform, gs.score);
     else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
-    b.isUfo = true;
-    b.loadTexture("ufopick_space");                          // empty saucer (320x320) sitting on the platform
+    b.isUfo = true; b._ufoFly = flyKey;                      // remember which flight sheet to ride
+    b.loadTexture(pickKey);                                  // empty saucer sitting on the platform
     b.anchor.setTo(0.5, 0.82); b.scale.setTo(0.4, 0.4);      // ~128px, disc bottom resting on the platform
     if (b.body) { b.body.setSize(280, 210, 20, 40); b.body.allowGravity = false; } // grab box over the saucer (texture space; scales with the sprite)
     platform.hasBonusObject = 9;
@@ -467,10 +470,11 @@ Doodle.activateUfo = function (a, b, gs) {
     a.withBonus = true; a.bonusType = 2; a.isUfoRide = true; // ride: invincible + counts as a flying power-up
     a._ufoPrevKey = Doodle.playerKey();
     var g = a.game, face = (a.scale.x < 0 ? -1 : 1);
+    var flyKey = b._ufoFly || ("ufofly_" + Doodle.getTheme()); // theme's flight sheet (captured at spawn)
     b.kill();
     if (gs.sounds && gs.sounds.ufo) gs.sounds.ufo.play();
-    if (Doodle._sheetOK(g, "ufofly_space", 9)) {
-      a.loadTexture("ufofly_space"); a.frame = 0;
+    if (Doodle._sheetOK(g, flyKey, 9)) {
+      a.loadTexture(flyKey); a.frame = 0;
       a.anchor.setTo(0.5, 0.46);
       a.scale.setTo(0.384 * face, 0.384);                    // ~172x129 in flight
       a.animations.add("uf", [0, 1, 2, 3, 4, 5, 6, 7, 8], 16, true); a.play("uf");
