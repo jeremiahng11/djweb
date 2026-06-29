@@ -445,8 +445,8 @@ Doodle.maybeUfo = function (gs, platform) {
     var _roll = Doodle.rand();                               // consume HERE so the shared-map RNG stream stays in sync regardless of theme
     if (Doodle.getTheme() !== "space") return;
     if (gs.score < 50) gs._ufoCount = 0;                     // reset each new game
-    if (gs._ufoCount >= 4) return;
-    if (_roll > 0.006) return;                               // rare, same cadence as the rocket
+    if (gs._ufoCount >= 999) return;                         // TEST: cap lifted (normal = 4)
+    if (_roll > 0.15) return;                                // TEST: ~1-in-7 platforms (normal = 0.006). REVERT to 0.006 after testing
     if (!Doodle._sheetOK(gs.game, "ufofly_space", 9) || !Doodle._imgOK(gs.game, "ufopick_space")) return;
     var b = gs.bonusPool.getFirstExists(false);
     if (b) b.reset(platform.x, platform.top + 5, "bonus2", platform, gs.score);
