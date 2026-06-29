@@ -157,6 +157,7 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("nose_default", "static/images/PlayerSheets/nose_default.png");
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
+    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/UFO-Doodler.png", 448, 336, 9); // doodler-in-UFO ride (space)
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
       var d = Doodle.THEME_DATA[th];
@@ -433,6 +434,73 @@ Doodle.maybeRocket = function (gs, platform) {
     platform.hasBonusObject = 9;
     gs._rocketCount = (gs._rocketCount || 0) + 1;
   } catch (e) { Doodle._show("maybeRocket: " + e.message); }
+};
+
+// --- UFO ride (space): grab the saucer -> the doodler-in-UFO flies up like the rocket, then pops out. ---
+// Art "ufofly_space" is a 3x3 grid (9 frames, 448x336) of the doodler in a UFO with an animated thruster.
+Doodle.maybeUfo = function (gs, platform) {
+  try {
+    if (!platform || platform.hasBonusObject !== -1) return; // deterministic gate (same across clients)
+    var _roll = Doodle.rand();                               // consume HERE so the shared-map RNG stream stays in sync regardless of theme
+    if (Doodle.getTheme() !== "space") return;
+    if (gs.score < 50) gs._ufoCount = 0;                     // reset each new game
+    if (gs._ufoCount >= 4) return;
+    if (_roll > 0.006) return;                               // rare, same cadence as the rocket
+    if (!Doodle._sheetOK(gs.game, "ufofly_space", 9)) return;
+    var b = gs.bonusPool.getFirstExists(false);
+    if (b) b.reset(platform.x, platform.top + 5, "bonus2", platform, gs.score);
+    else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
+    b.isUfo = true;
+    b.loadTexture("ufofly_space"); b.frame = 0;
+    b.anchor.setTo(0.5, 0.72); b.scale.setTo(0.3, 0.3);      // ~134x101 saucer resting on the platform
+    if (b.body) { b.body.setSize(360, 220, 44, 44); b.body.allowGravity = false; } // grab box over the saucer (texture space; scales with the sprite)
+    platform.hasBonusObject = 9;
+    gs._ufoCount = (gs._ufoCount || 0) + 1;
+  } catch (e) { Doodle._show("maybeUfo: " + e.message); }
+};
+
+Doodle.activateUfo = function (a, b, gs) {
+  try {
+    if (b.used || a.withBonus) return;                       // only one flying power-up at a time
+    b.used = true;
+    a.withBonus = true; a.bonusType = 2; a.isUfoRide = true; // ride: invincible + counts as a flying power-up
+    a._ufoPrevKey = Doodle.playerKey();
+    var g = a.game, face = (a.scale.x < 0 ? -1 : 1);
+    b.kill();
+    if (gs.sounds && gs.sounds.ufo) gs.sounds.ufo.play();
+    if (Doodle._sheetOK(g, "ufofly_space", 9)) {
+      a.loadTexture("ufofly_space"); a.frame = 0;
+      a.anchor.setTo(0.5, 0.46);
+      a.scale.setTo(0.384 * face, 0.384);                    // ~172x129 in flight
+      a.animations.add("uf", [0, 1, 2, 3, 4, 5, 6, 7, 8], 16, true); a.play("uf");
+    }
+    if (a.body) { a.body.velocity.x = 0; a.body.velocity.y = -1400; a.body.gravity.y = -2400; } // strong boost off the pad
+    Doodle._ufoFlight(a, gs);
+  } catch (e) { Doodle._show("activateUfo: " + e.message); }
+};
+
+// UFO flight: same ascent profile as the rocket, then the doodler pops back out (no empty vehicle to drop).
+Doodle._ufoFlight = function (a, gs) {
+  try {
+    var pt = a.playerTimer, S = Phaser.Timer.SECOND / 60;
+    pt.add(72 * S, function () { if (a.body) a.body.gravity.y = -1728; });  // cancels world gravity -> steady climb
+    pt.add(285 * S, function () { if (a.body) a.body.gravity.y = 850; });   // thrusters off -> decelerate to a gentle exit
+    pt.add(330 * S, function () {
+      try {
+        var _vy = (a.body && a.body.velocity) ? a.body.velocity.y : -280;   // continue the upward speed -> no jerk at exit
+        a.animations.stop(); a.withBonus = false; a.bonusType = null; a.isUfoRide = false;
+        a.loadTexture(a._ufoPrevKey || Doodle.playerKey()); a.frame = 0;
+        a.anchor.setTo(0.5, 0.5); a.scale.setTo(1, 1);       // back to the normal doodler (control re-flips facing)
+        if (a.body) {
+          a.body.setSize(60, 90, a.width / 2 - 30, a.height / 2 - 45 + 20); // realign collision to the doodler
+          a.body.reset(a.x, a.y);
+          a.body.velocity.x = 0; a.body.velocity.y = _vy;
+          a.body.gravity.y = -1520;                          // gentle decel -> drifts up a bit more, then falls onto platforms
+          a.game.time.events.add(780, function () { if (a.alive && a.body) a.body.gravity.y = 0; });
+        }
+      } catch (e2) {}
+    });
+  } catch (e) { Doodle._show("ufoFlight: " + e.message); }
 };
 
 Doodle.activateRocket = function (a, b, gs) {
