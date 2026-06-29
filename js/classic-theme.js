@@ -157,8 +157,8 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("nose_default", "static/images/PlayerSheets/nose_default.png");
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
-    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png?v=186", 160, 120, 9); // doodler-in-UFO ride (space, 480x360 -> 160x120 x9). ?v busts stale image cache
-    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=187"); // empty saucer pickup (space). ?v busts stale image cache
+    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png?v=188", 160, 120, 9); // doodler-in-UFO ride (space, 480x360 -> 160x120 x9). ?v busts stale image cache
+    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=188"); // empty saucer pickup (space). ?v busts stale image cache
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
       var d = Doodle.THEME_DATA[th];
@@ -456,7 +456,7 @@ Doodle.maybeUfo = function (gs, platform) {
     else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
     b.isUfo = true; b._ufoFly = flyKey; b._ufoPick = pickKey; // flight sheet (may be null) + pickup, for the ride/fallback
     b.loadTexture(pickKey);                                  // empty saucer sitting on the platform
-    b.anchor.setTo(0.5, 0.82); b.scale.setTo(0.28, 0.28);    // ~90px saucer, disc bottom resting on the platform (smaller)
+    b.anchor.setTo(0.5, 0.82); b.scale.setTo(0.42, 0.42);    // ~134px saucer, disc bottom resting on the platform
     if (b.body) { b.body.setSize(280, 210, 20, 40); b.body.allowGravity = false; } // grab box over the saucer (texture space; scales with the sprite)
     platform.hasBonusObject = 9;
     gs._ufoCount = (gs._ufoCount || 0) + 1;
@@ -472,12 +472,13 @@ Doodle.activateUfo = function (a, b, gs) {
     var g = a.game, face = (a.scale.x < 0 ? -1 : 1);
     var flyKey = b._ufoFly || ("ufofly_" + Doodle.getTheme()); // theme's flight sheet (captured at spawn)
     var pickKey = b._ufoPick || ("ufopick_" + Doodle.getTheme());
+    a._ufoPick = pickKey;                                    // for the empty-saucer drop at flight end
     b.kill();
     if (gs.sounds && gs.sounds.ufo) gs.sounds.ufo.play();
     if (Doodle._sheetOK(g, flyKey, 9)) {                     // animated doodler-in-UFO
       a.loadTexture(flyKey); a.frame = 0;
       a.anchor.setTo(0.5, 0.46);
-      a.scale.setTo(0.88 * face, 0.88);                      // 160px frame -> ~140px in flight (+30%)
+      a.scale.setTo(1.2 * face, 1.2);                        // 160px frame -> ~192px in flight (bigger)
       a.animations.add("uf", [0, 1, 2, 3, 4, 5, 6, 7, 8], 16, true); a.play("uf");
     } else if (Doodle._imgOK(g, pickKey)) {                  // flight sheet unavailable -> ride the empty saucer
       a.loadTexture(pickKey); a.frame = 0;
@@ -497,6 +498,7 @@ Doodle._ufoFlight = function (a, gs) {
     pt.add(330 * S, function () {
       try {
         var _vy = (a.body && a.body.velocity) ? a.body.velocity.y : -280;   // continue the upward speed -> no jerk at exit
+        var g = a.game, _ux = a.x, _uy = a.y;                // riding UFO position before the swap
         a.animations.stop(); a.withBonus = false; a.bonusType = null; a.isUfoRide = false;
         a.loadTexture(a._ufoPrevKey || Doodle.playerKey()); a.frame = 0;
         a.anchor.setTo(0.5, 0.5); a.scale.setTo(1, 1);       // back to the normal doodler (control re-flips facing)
@@ -505,7 +507,25 @@ Doodle._ufoFlight = function (a, gs) {
           a.body.reset(a.x, a.y);
           a.body.velocity.x = 0; a.body.velocity.y = _vy;
           a.body.gravity.y = -1520;                          // gentle decel -> drifts up a bit more, then falls onto platforms
-          a.game.time.events.add(780, function () { if (a.alive && a.body) a.body.gravity.y = 0; });
+          g.time.events.add(780, function () { if (a.alive && a.body) a.body.gravity.y = 0; });
+        }
+        // thrusters off -> the empty saucer drops away behind the doodler (same as the rocket shell)
+        var pk = a._ufoPick || ("ufopick_" + Doodle.getTheme());
+        if (Doodle._imgOK(g, pk)) {
+          var eu = g.add.sprite(_ux, _uy, pk);
+          eu.anchor.setTo(0.5, 0.5); eu.scale.setTo(0.6, 0.6);
+          try { a.parent.addChildAt(eu, a.parent.getChildIndex(a)); } catch (ez) {} // render behind the doodler
+          g.physics.arcade.enable(eu); eu.body.allowGravity = true;
+          eu.body.velocity.y = _vy; eu.body.velocity.x = 6;
+          eu.body.gravity.y = -1520; eu.body.angularVelocity = 24; // glides up a touch, tips over
+          eu.checkWorldBounds = true; eu.outOfBoundsKill = true;
+          g.time.events.add(780, function () {
+            if (eu && eu.alive && eu.body) {
+              eu.body.gravity.y = 1472; eu.body.angularVelocity = 60; // momentum spent -> drop + scroll with the world
+              gs._fallRockets = (gs._fallRockets || []).filter(function (r) { return r && r.alive; });
+              gs._fallRockets.push(eu);
+            }
+          });
         }
       } catch (e2) {}
     });
