@@ -102,7 +102,11 @@ Doodle.MP = (function () {
         var y = state.player.y - (g.sScore - state.score) * 2;     // 2px per score point
         var on = y > 24 && y < H - 24;
         g.visible = on; if (g.djTag) g.djTag.visible = on;
-        if (on) { g.x = g.sX; g.y = y; g.alpha = p.alive ? .55 : .28; if (g.djTag) { g.djTag.x = g.sX; g.djTag.y = y - 50; } }
+        if (on) {
+          g.x = g.sX; g.y = y; g.alpha = p.alive ? .55 : .28;
+          try { g.frame = p.alive ? ((Date.now() / 120 | 0) % 4) : 0; } catch (fe) {} // cycle the 4 sheet frames = jumping
+          if (g.djTag) { g.djTag.x = g.sX; g.djTag.y = y - 50; }
+        }
       });
       for (var id in ghosts) if (!present[id]) { try { ghosts[id].djTag && ghosts[id].djTag.destroy(); ghosts[id].destroy(); } catch (e) {} delete ghosts[id]; }
     } catch (e) {}

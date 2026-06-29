@@ -53,8 +53,15 @@
     </div>
     <script>
       (function () {
-        // console-only in the online build (no on-screen overlay); swallow the gyro library's noisy promise rejections
-        window.addEventListener("error", function (e) { try { console.error("ERROR:", e.message, (e.filename || "") + ":" + (e.lineno || "")); } catch (x) {} });
+        // show uncaught errors on-screen (diagnostic: lets a phone user screenshot a crash) + console
+        window.addEventListener("error", function (e) {
+          try { console.error("ERROR:", e.message, (e.filename || "") + ":" + (e.lineno || "")); } catch (x) {}
+          try {
+            var d = document.getElementById("djerr");
+            if (!d) { d = document.createElement("div"); d.id = "djerr"; d.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:100001;background:rgba(170,0,0,.94);color:#fff;font:12px/1.4 monospace;padding:8px 10px;white-space:pre-wrap;max-height:45%;overflow:auto;-webkit-user-select:text;user-select:text;"; document.body.appendChild(d); d.onclick = function () { d.style.display = "none"; }; }
+            d.style.display = ""; d.textContent = "ERR (tap to hide): " + (e.message || "") + "\n@ " + ((e.filename || "").split("/").pop()) + ":" + (e.lineno || "") + ":" + (e.colno || "");
+          } catch (x) {}
+        });
         window.addEventListener("unhandledrejection", function (e) { try { console.warn("PROMISE:", e.reason && e.reason.message ? e.reason.message : e.reason); } catch (x) {} if (e.preventDefault) e.preventDefault(); });
       })();
       // PWA service worker (installable + offline after first load)
@@ -127,9 +134,9 @@
     <!-- Leaderboard API base, same-origin under /djapi (the server app is routed to djweb.../djapi). "" = local-only. -->
     <script>window.DJ_API_URL = "https://djapi.jeremiah.sg";</script>
     <script src="js/fulltilt.min.js"></script>
-    <script src="js/classic-theme.js?v=173"></script>
-    <script src="js/classic.themed.js?v=173"></script>
-    <script src="js/mp.js?v=173"></script>
-    <script src="js/doodle.js?v=173"></script>
+    <script src="js/classic-theme.js?v=174"></script>
+    <script src="js/classic.themed.js?v=174"></script>
+    <script src="js/mp.js?v=174"></script>
+    <script src="js/doodle.js?v=174"></script>
   </body>
 </html>
