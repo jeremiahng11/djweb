@@ -473,22 +473,46 @@ Doodle.activateUfo = function (a, b, gs) {
     var flyKey = b._ufoFly || ("ufofly_" + Doodle.getTheme()); // theme's flight sheet (captured at spawn)
     var pickKey = b._ufoPick || ("ufopick_" + Doodle.getTheme());
     a._ufoPick = pickKey;                                    // for the empty-saucer drop at flight end
+    var poolY = (gs.bonusPool && gs.bonusPool.y) || 0;
+    var rxw = b.x, rBottomW = b.y + poolY;                   // where the saucer sat (world coords)
     b.kill();
-    if (gs.sounds && gs.sounds.ufo) gs.sounds.ufo.play();
-    if (Doodle._sheetOK(g, flyKey, 9)) {                     // animated doodler-in-UFO
-      a.loadTexture(flyKey); a.frame = 6;
-      a.anchor.setTo(0.5, 0.46);
-      a.scale.setTo(face, 1);                                // NATIVE: disc is 157px at scale 1 -> survives the game's movement scale-reset, matches the falling/pickup saucer
-      a.animations.add("uf_takeoff", [6, 7, 8], 10, true);   // bottom row = full flame (taking off)
-      a.animations.add("uf_fast", [3, 4, 5], 10, true);      // middle row = medium flame (climbing fast)
-      a.animations.add("uf_slow", [0, 1, 2], 10, true);      // top row = no flame (slowing down)
-      a.play("uf_takeoff");
-    } else if (Doodle._imgOK(g, pickKey)) {                  // flight sheet unavailable -> ride the empty saucer
-      a.loadTexture(pickKey); a.frame = 0;
-      a.anchor.setTo(0.5, 0.5); a.scale.setTo(0.526 * face, 0.526);
+    a._boarding = true;                                      // freeze world scroll while the doodler hops in
+    if (a.body) a.body.enable = false;                       // entry is tween-only (physics can't fight it)
+    a.x = rxw;
+    // the empty saucer waits on the platform while the doodler jumps into its centre
+    var eu = null;
+    if (Doodle._imgOK(g, pickKey)) {
+      eu = g.add.sprite(rxw, rBottomW, pickKey);
+      eu.anchor.setTo(0.5, 0.82); eu.scale.setTo(0.526, 0.526);
+      try { a.parent.addChildAt(eu, a.parent.getChildIndex(a)); } catch (e0) {} // render behind the doodler
     }
-    if (a.body) { a.body.velocity.x = 0; a.body.velocity.y = -1400; a.body.gravity.y = -2400; } // strong boost off the pad
-    Doodle._ufoFlight(a, gs);
+    var domeY = rBottomW - 78;                               // the saucer's dome centre the doodler lands in
+    var doLaunch = function () {
+      try {
+        if (eu) eu.destroy();
+        a._boarding = false;
+        if (gs.sounds && gs.sounds.ufo) gs.sounds.ufo.play();
+        a.alpha = 1; a.y = domeY;
+        if (Doodle._sheetOK(g, flyKey, 9)) {                 // animated doodler-in-UFO
+          a.loadTexture(flyKey); a.frame = 6;
+          a.anchor.setTo(0.5, 0.46);
+          a.scale.setTo(face, 1);                            // native size (survives the movement scale-reset)
+          a.animations.add("uf_takeoff", [6, 7, 8], 10, true); // bottom row = full flame (taking off)
+          a.animations.add("uf_fast", [3, 4, 5], 10, true);    // middle row = medium flame (climbing fast)
+          a.animations.add("uf_slow", [0, 1, 2], 10, true);    // top row = no flame (slowing down)
+          a.play("uf_takeoff");
+        } else if (Doodle._imgOK(g, pickKey)) {              // flight sheet unavailable -> ride the empty saucer
+          a.loadTexture(pickKey); a.frame = 0; a.anchor.setTo(0.5, 0.5); a.scale.setTo(0.526 * face, 0.526);
+        }
+        if (a.body) { a.body.enable = true; a.body.allowGravity = true; a.body.velocity.x = 0; a.body.velocity.y = -1400; a.body.gravity.y = -2400; } // boost off the pad
+        Doodle._ufoFlight(a, gs);
+      } catch (eL) { Doodle._show("ufo launch: " + eL.message); }
+    };
+    // doodler hops UP into the centre of the saucer and shrinks to fit, then it takes off
+    g.add.tween(a).to({ x: rxw }, 360, Phaser.Easing.Quadratic.Out, true);
+    g.add.tween(a.scale).to({ x: 0.62 * face, y: 0.62 }, 360, Phaser.Easing.Quadratic.In, true);
+    var tw = g.add.tween(a).to({ y: domeY }, 360, Phaser.Easing.Quadratic.Out, true);
+    tw.onComplete.add(doLaunch);
   } catch (e) { Doodle._show("activateUfo: " + e.message); }
 };
 
