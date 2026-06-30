@@ -449,8 +449,8 @@ Doodle.maybeUfo = function (gs, platform) {
     var flyKey = Doodle._sheetOK(gs.game, "ufofly_" + _t, 9) ? "ufofly_" + _t : (Doodle._sheetOK(gs.game, "ufofly_space", 9) ? "ufofly_space" : null);
     if (!pickKey) return; // only the small pickup is needed to SHOW the saucer; the flight sheet is used at ride time (with fallback)
     if (gs.score < 50) gs._ufoCount = 0;                     // reset each new game
-    if (gs._ufoCount >= 999) return;                         // TEST: cap lifted (normal = 4)
-    if (_roll > 0.5) return;                                 // TEST: ~1-in-2 platforms (normal = 0.006). REVERT to 0.006 after testing
+    if (gs._ufoCount >= 4) return;                           // same cap as the rocket
+    if (_roll > 0.006) return;                              // same rarity as the rocket
     var b = gs.bonusPool.getFirstExists(false);
     if (b) b.reset(platform.x, platform.top + 5, "bonus2", platform, gs.score);
     else { b = new Doodle.Bonus(gs.game, platform.x, platform.top + 5, "bonus2", platform, gs.score, gs.sounds, gs.stats); gs.bonusPool.add(b); }
@@ -487,7 +487,9 @@ Doodle.activateUfo = function (a, b, gs) {
       try { a.parent.addChildAt(eu, a.parent.getChildIndex(a)); } catch (e0) {} // render behind the doodler
     }
     var domeY = rBottomW - 78;                               // the saucer's dome centre the doodler lands in
+    a._ufoGen = (a._ufoGen || 0) + 1; var _gen = a._ufoGen, launched = false;
     var doLaunch = function () {
+      if (launched || a._ufoGen !== _gen) return; launched = true; // run once; skip if a newer ride started
       try {
         if (eu) eu.destroy();
         a._boarding = false;
@@ -511,8 +513,8 @@ Doodle.activateUfo = function (a, b, gs) {
     // doodler hops UP into the centre of the saucer and shrinks to fit, then it takes off
     g.add.tween(a).to({ x: rxw }, 360, Phaser.Easing.Quadratic.Out, true);
     g.add.tween(a.scale).to({ x: 0.62 * face, y: 0.62 }, 360, Phaser.Easing.Quadratic.In, true);
-    var tw = g.add.tween(a).to({ y: domeY }, 360, Phaser.Easing.Quadratic.Out, true);
-    tw.onComplete.add(doLaunch);
+    g.add.tween(a).to({ y: domeY }, 360, Phaser.Easing.Quadratic.Out, true);
+    g.time.events.add(380, doLaunch);                       // launch via timer -> always fires (never stuck _boarding / shrunk doodler)
   } catch (e) { Doodle._show("activateUfo: " + e.message); }
 };
 
@@ -525,7 +527,7 @@ Doodle._ufoFlight = function (a, gs) {
     pt.add(330 * S, function () {
       try {
         var _vy = (a.body && a.body.velocity) ? a.body.velocity.y : -280;   // continue the upward speed -> no jerk at exit
-        var g = a.game, _ux = a.x, _uy = a.y;                // riding UFO position before the swap
+        var g = a.game, _ux = a.x, _uy = a.y, gen = a._ufoGen; // riding UFO position before the swap
         a.animations.stop(); a.withBonus = false; a.bonusType = null; a.isUfoRide = false;
         a.loadTexture(a._ufoPrevKey || Doodle.playerKey()); a.frame = 0;
         a.anchor.setTo(0.5, 0.5); a.scale.setTo(1, 1);       // back to the normal doodler (control re-flips facing)
@@ -534,7 +536,7 @@ Doodle._ufoFlight = function (a, gs) {
           a.body.reset(a.x, a.y);
           a.body.velocity.x = 0; a.body.velocity.y = _vy;
           a.body.gravity.y = -1520;                          // gentle decel -> drifts up a bit more, then falls onto platforms
-          g.time.events.add(780, function () { if (a.alive && a.body) a.body.gravity.y = 0; });
+          g.time.events.add(780, function () { if (a.alive && a.body && a._ufoGen === gen) a.body.gravity.y = 0; });
         }
         // thrusters off -> the empty saucer drops away behind the doodler (same as the rocket shell)
         var pk = a._ufoPick || ("ufopick_" + Doodle.getTheme());
