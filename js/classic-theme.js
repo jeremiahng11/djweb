@@ -157,8 +157,8 @@ Doodle.loadThemeAssets = function (game) {
     game.load.image("nose_default", "static/images/PlayerSheets/nose_default.png");
     game.load.image("menuOverlay", "static/images/menu_overlay.png");
     game.load.image("menuTitle", "static/images/menu_title.png");
-    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png?v=191", 160, 120, 9); // doodler-in-UFO ride (space, 480x360 -> 160x120 x9). ?v busts stale image cache
-    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=191"); // empty saucer pickup (space). ?v busts stale image cache
+    game.load.spritesheet("ufofly_space", "static/images/Playerfull/space/ufo-doodler.png?v=192", 192, 144, 9); // doodler-in-UFO ride (space, 480x360 -> 160x120 x9). ?v busts stale image cache
+    game.load.image("ufopick_space", "static/images/Playerfull/space/ufo-power.png?v=192"); // empty saucer pickup (space). ?v busts stale image cache
     Doodle.THEMES.forEach(function (th) {
       if (th === "default") return;
       var d = Doodle.THEME_DATA[th];
@@ -478,7 +478,7 @@ Doodle.activateUfo = function (a, b, gs) {
     if (Doodle._sheetOK(g, flyKey, 9)) {                     // animated doodler-in-UFO
       a.loadTexture(flyKey); a.frame = 6;
       a.anchor.setTo(0.5, 0.46);
-      a.scale.setTo(1.2 * face, 1.2);                        // 160px frame -> ~157px disc in flight
+      a.scale.setTo(face, 1);                                // NATIVE: disc is 157px at scale 1 -> survives the game's movement scale-reset, matches the falling/pickup saucer
       a.animations.add("uf_takeoff", [6, 7, 8], 10, true);   // bottom row = full flame (taking off)
       a.animations.add("uf_fast", [3, 4, 5], 10, true);      // middle row = medium flame (climbing fast)
       a.animations.add("uf_slow", [0, 1, 2], 10, true);      // top row = no flame (slowing down)
