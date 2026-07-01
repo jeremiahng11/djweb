@@ -536,7 +536,7 @@ Doodle._ufoFlight = function (a, gs) {
           a.body.reset(a.x, a.y);
           a.body.velocity.x = 0; a.body.velocity.y = _vy;
           a.body.gravity.y = -1520;                          // gentle decel -> drifts up a bit more, then falls onto platforms
-          g.time.events.add(780, function () { if (a.alive && a.body && a._ufoGen === gen) a.body.gravity.y = 0; });
+          g.time.events.add(780, function () { if (a.alive && a.body && !a.withBonus && !a._boarding) a.body.gravity.y = 0; });
         }
         // thrusters off -> the empty saucer drops away behind the doodler (same as the rocket shell)
         var pk = a._ufoPick || ("ufopick_" + Doodle.getTheme());
@@ -648,7 +648,7 @@ Doodle._rocketFlight = function (a, gs, th) {
           a.body.velocity.x = 0;
           a.body.velocity.y = _vy;       // CONTINUES the flight's upward speed (NO jerk) -> smooth linger as the speed reduces, screen scrolls up a bit more
           a.body.gravity.y = -1520;      // world(1728)+this = ~210 -> gentler decel, drifts UP a bit FURTHER while slowing (linger)
-          a.game.time.events.add(780, function () { if (a.alive && a.body) a.body.gravity.y = 0; }); // ...then world gravity takes over and it falls onto platforms
+          a.game.time.events.add(780, function () { if (a.alive && a.body && !a.withBonus && !a._boarding) a.body.gravity.y = 0; }); // ...then world gravity takes over and it falls onto platforms
         }
       } catch (e2) {}
     });
