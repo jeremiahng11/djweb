@@ -799,7 +799,7 @@ Doodle.Bonus = function(a, b, c, d, e, f, g, h) {
 }, Doodle.Bonus.prototype = Object.create(Phaser.Sprite.prototype), Doodle.Bonus.prototype.constructor = Doodle.Bonus, Doodle.Bonus.prototype.kill = function() {
     this.playerTimer && this.playerTimer.stop(), Phaser.Sprite.prototype.kill.call(this)
 }, Doodle.Bonus.prototype.reset = function(a, b, c, d, e) {
-    Phaser.Sprite.prototype.reset.call(this, a, b), this.maxVel = 0, this.loadTexture("atlas", c), this.angle = 0, this.type = c, Doodle.applyBonusPickup(this, c), this.game.physics.arcade.enableBody(this), this.body.setSize(this.width, this.height, 0, 0), this.body.velocity.x = 0, this.body.angularVelocity = 0, this.body.velocity.y = 0, this.body.allowGravity = !1, this.body.immovable = !0, this.anchor.setTo(.5, 1), this.used = !1, this.isRocket = !1, 0 != d.body.velocity.x && (this.body.velocity.x = d.body.velocity.x, d.child = this);
+    Phaser.Sprite.prototype.reset.call(this, a, b), this.maxVel = 0, this.loadTexture("atlas", c), this.angle = 0, this.type = c, Doodle.applyBonusPickup(this, c), this.game.physics.arcade.enableBody(this), this.body.setSize(this.width, this.height, 0, 0), this.body.velocity.x = 0, this.body.angularVelocity = 0, this.body.velocity.y = 0, this.body.allowGravity = !1, this.body.immovable = !0, this.anchor.setTo(.5, 1), this.used = !1, this.isRocket = !1, this.isUfo = !1, 0 != d.body.velocity.x && (this.body.velocity.x = d.body.velocity.x, d.child = this);
     var f = Math.random() * (d.width - this.width - 10) - (d.width - this.width - 10) / 2;
     this.x -= f
 }, Doodle.Bonus.prototype.update = function() {
