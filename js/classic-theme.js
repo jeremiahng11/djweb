@@ -183,7 +183,7 @@ Doodle.loadThemeAssets = function (game) {
         game.load.spritesheet("propfly_" + th, "static/images/PowerTiles/" + th + "_prop_fly.png", 64, 64, 4); // spinning worn animation
       }
       if (d && d.jet) {
-        game.load.image("jetpick_" + th, "static/images/PowerTiles/" + th + "_jetpack.png?v=198");                 // twin-rocket pickup (platform only)
+        game.load.image("jetpick_" + th, "static/images/PowerTiles/" + th + "_jetpack.png?v=200");                 // twin-rocket pickup (platform only)
         game.load.spritesheet("jet_" + th, "static/images/PowerTiles/" + th + "_jetpack_fly.png", 64, 128, 10); // worn flight animation
       }
       if (d && d.rocket) {
